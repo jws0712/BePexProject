@@ -5,15 +5,21 @@ using UnityEngine;
 
 public class JudgeManager : MonoBehaviour
 {
+    public static JudgeManager Instance;
+
     [SerializeField] private Transform centerTransform;
     [SerializeField] private float[] judgeDistances;
 
     private Vector2[] judgeRanges;
 
-    private List<GameObject> noteList = new();
+    [SerializeField] private List<GameObject> noteList = new();
 
     public List<GameObject> NoteList => noteList;
 
+    private void Awake()
+    {
+        Instance = this;
+    }
 
     private void Start()
     {
@@ -25,17 +31,23 @@ public class JudgeManager : MonoBehaviour
         }
     }
 
-    private void Update()
+    public void JudgeNote()
     {
-        for(int i = 0; i < noteList.Count; i++)
+        for (int i = 0; i < noteList.Count; i++)
         {
             float notePosY = noteList[i].transform.position.y;
 
-            for(int y = 0; y < judgeRanges.Length; y++)
+            for (int y = 0; y < judgeRanges.Length; y++)
             {
                 //노트의 Y 값이 판정 범위내에 있는지 확인
                 if (judgeRanges[y].x <= notePosY && notePosY <= judgeRanges[y].y)
                 {
+                    if (noteList[i].TryGetComponent(out Note note))
+                    {
+                        note.HideNote();
+                    }
+
+                    noteList.RemoveAt(i);
                     Debug.Log("Hit" + y);
                     return;
                 }
