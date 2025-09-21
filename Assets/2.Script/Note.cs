@@ -5,9 +5,8 @@ using UnityEngine;
 
 public class Note : MonoBehaviour
 {
-    [SerializeField] private float noteSpeed;
-    [SerializeField] private AudioClip noteHitSFX;
-
+    private float noteSpeed;
+    private AudioClip sfx;
     private SpriteRenderer spriteRenderer;
 
     public SpriteRenderer Renderer => spriteRenderer;
@@ -15,10 +14,13 @@ public class Note : MonoBehaviour
     private void OnEnable()
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
+        noteSpeed = GameManager.Instance.NoteSpeed;
+        sfx = GameManager.Instance.NoteHitSfx;
     }
 
     private void Update()
     {
+        if (GameManager.Instance.GameState == GameStateType.Pause) return;
         transform.position += Vector3.down * noteSpeed * Time.deltaTime;
     }
 
@@ -26,7 +28,7 @@ public class Note : MonoBehaviour
     {
         if (spriteRenderer.sprite == null) return;
 
-        SoundManager.Instance.PlaySFX(noteHitSFX);
+        SoundManager.Instance.PlaySFX(sfx);
         spriteRenderer.sprite = null;
     }
 }

@@ -1,47 +1,38 @@
-using System.Collections;
-using System.Collections.Generic;
-
 using UnityEngine;
 
 public class Metronome : MonoBehaviour
 {
     [SerializeField] private float bpm;
-    [SerializeField] private Transform noteSpawnTransform;
     [SerializeField] private GameObject notePrefab;
-    [SerializeField] private GameObject notePrefab2;
 
-    private float beatDurationSec;
+    private Transform noteSpwanPos;
+
     private float nextBeatPos;
 
-    private double timePosMs;
-    private double startDspTime;
+    private float timePos;
 
     private int lastBeat;
 
     private void Start()
     {
-        beatDurationSec = 60f / bpm;
-        nextBeatPos = beatDurationSec;
+        nextBeatPos = GameManager.Instance.BeatPerSec;
 
-        startDspTime = AudioSettings.dspTime;
+        noteSpwanPos = GameManager.Instance.NoteSpawnPos;
     }
 
     private void Update()
     {
-        timePosMs = AudioSettings.dspTime - startDspTime;
+        timePos = SoundManager.Instance.SongPosition;
 
-        //흐른시간이 음악의 길이 보다 길다면 노트생성을 정지 시킴
-        if(timePosMs >= SoundManager.Instance.MusicLength)
-        {
-            return;
-        }
+        if (timePos >= SoundManager.Instance.MusicLength) return;
+        if (GameManager.Instance.GameState == GameStateType.Pause) return;
 
-        if (timePosMs >= nextBeatPos)
+        if (timePos >= nextBeatPos)
         {
-            GameObject note = Instantiate(notePrefab, noteSpawnTransform.position, Quaternion.identity);
+            GameObject note = Instantiate(notePrefab, noteSpwanPos.position, Quaternion.identity);
             JudgementManager.Instance.NoteList.Enqueue(note);
 
-            nextBeatPos += beatDurationSec;
+            nextBeatPos += GameManager.Instance.BeatPerSec;
             lastBeat++;
         }
     }

@@ -1,22 +1,45 @@
 using System.Collections;
 using System.Collections.Generic;
+
 using UnityEngine;
+
+public enum GameStateType
+{
+    Idle,
+    Play,
+    Pause,
+    End,
+}
 
 public class GameManager : MonoBehaviour
 {
     public static GameManager Instance;
 
+    [Header("GameSetting")]
+    [SerializeField] private float musicBpm;
+    [SerializeField] private float noteSpeed;
+
+    [Header("Clip")]
     [SerializeField] private AudioClip music;
+    [SerializeField] private AudioClip noteHitSfx;
+
+    [Header("Transform")]
     [SerializeField] private Transform center;
+    [SerializeField] private Transform noteSpawnPos;
+
     [SerializeField] private bool isAuto;
 
-    private bool isGameStart;
+    private float beatPerSec;
 
-    public bool IsGameStart => isGameStart;
-    public bool IsAuto => isAuto;
+    private GameStateType gameState;
 
+    public GameStateType GameState => gameState;
+
+    public float BeatPerSec => beatPerSec;
+    public float NoteSpeed => noteSpeed;
+    public AudioClip NoteHitSfx => noteHitSfx;
     public Transform Center => center;
-
+    public Transform NoteSpawnPos => noteSpawnPos;
 
     private void Awake()
     {
@@ -26,17 +49,26 @@ public class GameManager : MonoBehaviour
 
     }
 
-
-    private void OnTriggerEnter2D(Collider2D collision)
+    private void Start()
     {
-        if (isAuto) JudgementManager.Instance.JudgeNote();
+        beatPerSec = 60 / musicBpm;
 
-        if (isGameStart) return;
+        float noteTravelTime = (noteSpawnPos.position.y - center.position.y) / noteSpeed;
+        float delayTime = (float)AudioSettings.dspTime + (noteTravelTime + beatPerSec);
 
-        if (collision.CompareTag("Note"))
-        {
-            isGameStart = true;
-            SoundManager.Instance.PlayMusic(music);
-        }
+        SoundManager.Instance.PlayMusic(music, delayTime);
     }
+
+    public void Pause()
+    {
+        gameState = GameStateType.Pause;
+        SoundManager.Instance.PauseMusic();
+    }
+
+    public void Continue()
+    {
+        gameState = GameStateType.Play;
+        SoundManager.Instance.UnPauseMusic();
+    }
+
 }

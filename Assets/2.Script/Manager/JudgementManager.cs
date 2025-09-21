@@ -29,11 +29,8 @@ public class JudgementManager : MonoBehaviour
     [SerializeField] private GameObject judgeEffect;
 
     private Transform center;
-
     private Queue<GameObject> noteQueue = new();
-
     private JudgeType judgeResult;
-
 
     public JudgeType JudgeResult => judgeResult;
 
@@ -60,8 +57,8 @@ public class JudgementManager : MonoBehaviour
         for (int j = 0; j < judgeDatas.Length; j++)
         {
             //노트의 Y 값이 판정 범위내에 있는지 확인
-            if ((center.position.y - judgeDatas[j].distance) <= notePosY
-             && (center.position.y + judgeDatas[j].distance) >= notePosY)
+            if ((center.position.y + judgeDatas[j].distance) >= notePosY
+             && (center.position.y - judgeDatas[j].distance) <= notePosY)
             {
                 if (currentNote.TryGetComponent(out Note note))
                 {
@@ -73,7 +70,6 @@ public class JudgementManager : MonoBehaviour
 
                 judgeResult = judgeDatas[j].type;
                 noteQueue.Dequeue();
-                Debug.Log(judgeResult);
                 return;
             }
         }
