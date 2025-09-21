@@ -39,7 +39,7 @@ public class SoundManager : MonoBehaviour
 
     private void Start()
     {
-        //이미 흐르고 있던 시간을 저장함
+        //게임 시작 시간 저장
         startDpsTime = (float)AudioSettings.dspTime;
     }
 
@@ -50,24 +50,30 @@ public class SoundManager : MonoBehaviour
         songPosition = (float)(AudioSettings.dspTime - startDpsTime) - musicOffset * bgmSource.pitch;
     }
 
+    //음악 재생
     public void PlayMusic(AudioClip clip, float delayTime)
     {
         bgmSource.clip = clip;
         bgmSource.PlayScheduled(delayTime);
     }
 
+    //음악 일시정지
     public void PauseMusic()
     {
+        //일시정지 버튼을 누른 시간을 계산
         pauseOffset = (float)AudioSettings.dspTime - startDpsTime;
         bgmSource.Pause();
     }
 
+    //음악 일시정지 풀기
     public void UnPauseMusic()
     {
+        //게임 시작 시간에 일시정지 상태인 동안의 시간을 빼서 게임 시작 시간을 다시 계산
         startDpsTime = (float)AudioSettings.dspTime - pauseOffset;
         bgmSource.UnPause();
     }
 
+    //효과음 재생
     public void PlaySFX(AudioClip clip)
     {
         sfxSource.PlayOneShot(clip);

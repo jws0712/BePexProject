@@ -1838,8 +1838,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   musicBpm: 120
   noteSpeed: 5
+  gameFrameRate: 60
   music: {fileID: 8300000, guid: c62a529f93a7ae14ab33f60ae0237345, type: 3}
-  noteHitSfx: {fileID: 0}
+  noteHitSfx: {fileID: 8300000, guid: f270b81d8ab6b4a2cb8fdaba112aca58, type: 3}
   center: {fileID: 305819224}
   noteSpawnPos: {fileID: 931569727}
   isAuto: 0

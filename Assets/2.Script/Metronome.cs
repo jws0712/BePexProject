@@ -29,6 +29,7 @@ public class Metronome : MonoBehaviour
 
         if (timePos >= nextBeatPos)
         {
+            //노트 생성
             GameObject note = Instantiate(notePrefab, noteSpwanPos.position, Quaternion.identity);
             JudgementManager.Instance.NoteList.Enqueue(note);
 

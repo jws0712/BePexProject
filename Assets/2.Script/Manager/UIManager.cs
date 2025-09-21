@@ -30,18 +30,20 @@ public class UIManager : MonoBehaviour
         timeText.text = SoundManager.Instance.SongPosition.ToString();
     }
 
-
+    //일시정지 버튼 이벤트
     public void Pause()
     {
         pausePanel.SetActive(true);
         GameManager.Instance.Pause();
     }
 
+    //다시하기 버튼 이벤트
     public void Replay()
     {
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 
+    //계속하기 버튼 이벤트
     public void Continue()
     {
         pausePanel.SetActive(false);

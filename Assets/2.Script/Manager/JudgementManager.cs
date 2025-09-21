@@ -46,6 +46,7 @@ public class JudgementManager : MonoBehaviour
         center = GameManager.Instance.Center;
     }
 
+    //노트 판정
     public void JudgeNote()
     {
         if (noteQueue.Count == 0) return;
