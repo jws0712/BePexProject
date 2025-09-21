@@ -6,8 +6,11 @@ using UnityEngine;
 public class Note : MonoBehaviour
 {
     [SerializeField] private float noteSpeed;
+    [SerializeField] private AudioClip noteHitSFX;
 
     private SpriteRenderer spriteRenderer;
+
+    public SpriteRenderer Renderer => spriteRenderer;
 
     private void OnEnable()
     {
@@ -21,13 +24,9 @@ public class Note : MonoBehaviour
 
     public void HideNote()
     {
-        spriteRenderer.sprite = null;
-    }
+        if (spriteRenderer.sprite == null) return;
 
-    //화면 밖으로 나갔을때 실행
-    private void OnBecameInvisible()
-    {
-        JudgeManager.Instance.NoteList.Remove(gameObject);
-        Destroy(gameObject);
+        SoundManager.Instance.PlaySFX(noteHitSFX);
+        spriteRenderer.sprite = null;
     }
 }

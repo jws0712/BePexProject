@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+
 using UnityEngine;
 
 public class SoundManager : MonoBehaviour
@@ -8,6 +9,19 @@ public class SoundManager : MonoBehaviour
 
     [SerializeField] private AudioSource bgmSource;
     [SerializeField] private AudioSource sfxSource;
+
+    public float MusicLength
+    {
+        get
+        {
+            if(bgmSource.clip != null)
+            {
+                return bgmSource.clip.length;
+            }
+
+            return 0;
+        }
+    }
 
     private void Awake()
     {
