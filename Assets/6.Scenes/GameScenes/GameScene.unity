@@ -1843,7 +1843,7 @@ MonoBehaviour:
   noteHitSfx: {fileID: 8300000, guid: f270b81d8ab6b4a2cb8fdaba112aca58, type: 3}
   center: {fileID: 305819224}
   noteSpawnPos: {fileID: 931569727}
-  isAuto: 0
+  isAuto: 1
 --- !u!1 &1382805155
 GameObject:
   m_ObjectHideFlags: 0
@@ -2747,7 +2747,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1d52787c6a151f64b92ffc5c7f5561a5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  bpm: 120
   notePrefab: {fileID: 1496394729414490259, guid: 426b4723136cb034bb1b921e3f14300f, type: 3}
 --- !u!1 &2013549838
 GameObject:

@@ -28,13 +28,14 @@ public class JudgementManager : MonoBehaviour
     [SerializeField] private JudgeData[] judgeDatas;
     [SerializeField] private GameObject judgeEffect;
 
+    private AudioClip sfx;
     private Transform center;
-    private Queue<GameObject> noteQueue = new();
+    private Queue<Note> noteQueue = new();
     private JudgeType judgeResult;
 
     public JudgeType JudgeResult => judgeResult;
 
-    public Queue<GameObject> NoteList => noteQueue;
+    public Queue<Note> NoteQueue => noteQueue;
 
     private void Awake()
     {
@@ -44,6 +45,17 @@ public class JudgementManager : MonoBehaviour
     private void Start()
     {
         center = GameManager.Instance.Center;
+        sfx = GameManager.Instance.NoteHitSfx;
+    }
+
+    private void Update()
+    {
+        if (!GameManager.Instance.IsAuto || noteQueue.Count == 0) return;
+
+        if(SoundManager.Instance.SongPosition > noteQueue.Peek().NoteHitTime)
+        {
+            JudgeNote();
+        }
     }
 
     //노트 판정
@@ -51,7 +63,7 @@ public class JudgementManager : MonoBehaviour
     {
         if (noteQueue.Count == 0) return;
 
-        GameObject currentNote = noteQueue.Peek();
+        Note currentNote = noteQueue.Peek();
 
         float notePosY = currentNote.transform.position.y;
 
@@ -61,13 +73,11 @@ public class JudgementManager : MonoBehaviour
             if ((center.position.y + judgeDatas[j].distance) >= notePosY
              && (center.position.y - judgeDatas[j].distance) <= notePosY)
             {
-                if (currentNote.TryGetComponent(out Note note))
-                {
-                    note.HideNote();
+                currentNote.HideNote();
 
-                    //이펙트 소환
-                    Instantiate(judgeEffect, center.position, Quaternion.identity);
-                }
+                //이펙트 소환
+                Instantiate(judgeEffect, center.position, Quaternion.identity);
+                SoundManager.Instance.PlaySFX(sfx);
 
                 judgeResult = judgeDatas[j].type;
                 noteQueue.Dequeue();

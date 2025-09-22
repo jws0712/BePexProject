@@ -2,38 +2,39 @@ using UnityEngine;
 
 public class Metronome : MonoBehaviour
 {
-    [SerializeField] private float bpm;
     [SerializeField] private GameObject notePrefab;
 
-    private Transform noteSpwanPos;
+    private int lastBeat;
 
     private float nextBeatPos;
+    private float beatPerSec;
+    private float songPos;
+    private float musicLength;
 
-    private float timePos;
-
-    private int lastBeat;
+    private Transform noteSpwanPos;
 
     private void Start()
     {
         nextBeatPos = GameManager.Instance.BeatPerSec;
-
         noteSpwanPos = GameManager.Instance.NoteSpawnPos;
+        beatPerSec = GameManager.Instance.BeatPerSec;
+
+        musicLength = SoundManager.Instance.MusicLength;
     }
 
     private void Update()
     {
-        timePos = SoundManager.Instance.SongPosition;
+        songPos = SoundManager.Instance.SongPosition;
 
-        if (timePos >= SoundManager.Instance.MusicLength) return;
-        if (GameManager.Instance.GameState == GameStateType.Pause) return;
+        if (GameManager.Instance.GameState == GameStateType.Pause || songPos >= musicLength) return;
 
-        if (timePos >= nextBeatPos)
+        if (songPos >= nextBeatPos)
         {
             //노트 생성
-            GameObject note = Instantiate(notePrefab, noteSpwanPos.position, Quaternion.identity);
-            JudgementManager.Instance.NoteList.Enqueue(note);
+            GameObject currentNote = Instantiate(notePrefab, noteSpwanPos.position, Quaternion.identity);
+            if(currentNote.TryGetComponent(out Note note)) JudgementManager.Instance.NoteQueue.Enqueue(note);
 
-            nextBeatPos += GameManager.Instance.BeatPerSec;
+            nextBeatPos += beatPerSec;
             lastBeat++;
         }
     }

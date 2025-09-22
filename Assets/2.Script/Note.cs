@@ -5,17 +5,19 @@ using UnityEngine;
 
 public class Note : MonoBehaviour
 {
+    private float noteHitTime;
     private float noteSpeed;
-    private AudioClip sfx;
     private SpriteRenderer spriteRenderer;
 
     public SpriteRenderer Renderer => spriteRenderer;
+
+    public float NoteHitTime => noteHitTime;
 
     private void OnEnable()
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
         noteSpeed = GameManager.Instance.NoteSpeed;
-        sfx = GameManager.Instance.NoteHitSfx;
+        noteHitTime = SoundManager.Instance.SongPosition + GameManager.Instance.NoteHitTime;
     }
 
     private void Update()
@@ -28,7 +30,6 @@ public class Note : MonoBehaviour
     {
         if (spriteRenderer.sprite == null) return;
 
-        SoundManager.Instance.PlaySFX(sfx);
         spriteRenderer.sprite = null;
     }
 }
