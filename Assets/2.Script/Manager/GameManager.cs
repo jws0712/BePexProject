@@ -52,7 +52,6 @@ public class GameManager : MonoBehaviour
         Instance = this;
 
         Application.targetFrameRate = gameFrameRate;
-
     }
 
     private void Start()
@@ -84,7 +83,7 @@ public class GameManager : MonoBehaviour
         noteHitTime = (noteSpawnPos.position.y - center.position.y) / noteSpeed;
 
         //현재까지 오디오 엔진이 실행된 시간에 노트가 판정선 까지 가는데 걸리는 시간과 한 박자에 걸리는 시간을 더해 음악 딜레이 시간을 구함
-        float delayTime = (float)AudioSettings.dspTime + (noteHitTime + beatPerSec);
+        double delayTime = AudioSettings.dspTime + (noteHitTime + beatPerSec);
 
         //딜레이 시간만큼 멈췄다가 음악 실행
         SoundManager.Instance.PlayMusic(music, delayTime);

@@ -12,11 +12,11 @@ public class SoundManager : MonoBehaviour
     [SerializeField] private AudioSource bgmSource;
     [SerializeField] private AudioSource sfxSource;
 
-    private float pauseOffset;
-    private float startDpsTime;
-    private float songPosition;
+    private double pauseOffset;
+    private double startDpsTime;
+    private double songPosition;
 
-    public float SongPosition => songPosition;
+    public double SongPosition => songPosition;
 
     public float MusicLength
     {
@@ -40,18 +40,18 @@ public class SoundManager : MonoBehaviour
     private void Start()
     {
         //게임 시작 시간 저장
-        startDpsTime = (float)AudioSettings.dspTime;
+        startDpsTime = AudioSettings.dspTime;
     }
 
     private void Update()
     {
         if (GameManager.Instance.GameState == GameStateType.Pause) return;
         //이미 흐른 시간을 현재 흐르고 있는 시간을 빼서 현재 시간을 구함
-        songPosition = (float)(AudioSettings.dspTime - startDpsTime) - musicOffset * bgmSource.pitch;
+        songPosition = (AudioSettings.dspTime - startDpsTime) - musicOffset * bgmSource.pitch;
     }
 
     //음악 재생
-    public void PlayMusic(AudioClip clip, float delayTime)
+    public void PlayMusic(AudioClip clip, double delayTime)
     {
         bgmSource.clip = clip;
         bgmSource.PlayScheduled(delayTime);
@@ -61,7 +61,7 @@ public class SoundManager : MonoBehaviour
     public void PauseMusic()
     {
         //일시정지 버튼을 누른 시간을 계산
-        pauseOffset = (float)AudioSettings.dspTime - startDpsTime;
+        pauseOffset = AudioSettings.dspTime - startDpsTime;
         bgmSource.Pause();
     }
 

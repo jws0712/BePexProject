@@ -8,8 +8,9 @@ public class Metronome : MonoBehaviour
 
     private float nextBeatPos;
     private float beatPerSec;
-    private float songPos;
     private float musicLength;
+
+    private double songPos;
 
     private Transform noteSpwanPos;
 

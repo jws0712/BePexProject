@@ -28,7 +28,6 @@ public class JudgementManager : MonoBehaviour
     [SerializeField] private JudgeData[] judgeDatas;
     [SerializeField] private GameObject judgeEffect;
 
-    private AudioClip sfx;
     private Transform center;
     private Queue<Note> noteQueue = new();
     private JudgeType judgeResult;
@@ -45,7 +44,6 @@ public class JudgementManager : MonoBehaviour
     private void Start()
     {
         center = GameManager.Instance.Center;
-        sfx = GameManager.Instance.NoteHitSfx;
     }
 
     private void Update()
@@ -65,7 +63,7 @@ public class JudgementManager : MonoBehaviour
 
         Note currentNote = noteQueue.Peek();
 
-        float notePosY = currentNote.transform.position.y;
+        float notePosY = currentNote.gameObject.transform.position.y;
 
         for (int j = 0; j < judgeDatas.Length; j++)
         {
@@ -77,7 +75,6 @@ public class JudgementManager : MonoBehaviour
 
                 //ÀÌÆåÆ® ¼ÒÈ¯
                 Instantiate(judgeEffect, center.position, Quaternion.identity);
-                SoundManager.Instance.PlaySFX(sfx);
 
                 judgeResult = judgeDatas[j].type;
                 noteQueue.Dequeue();
@@ -86,17 +83,13 @@ public class JudgementManager : MonoBehaviour
         }
     }
 
-    private void OnTriggerEnter2D(Collider2D collision)
+    public void JudgeNoteOutCamera(Note note)
     {
-        if(collision.CompareTag("Note"))
+        if(noteQueue.Count > 0 && noteQueue.Peek() == note)
         {
-            if (noteQueue.Count > 0 && noteQueue.Peek() == collision.gameObject)
-            {
-                noteQueue.Dequeue();
-                judgeResult = JudgeType.Bad;
-            }
-
-            Destroy(collision.gameObject);
+            noteQueue.Dequeue();
+            judgeResult = JudgeType.Bad;
+            Destroy(note.gameObject);
         }
     }
 }
