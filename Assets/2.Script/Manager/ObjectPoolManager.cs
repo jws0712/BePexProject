@@ -6,18 +6,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Pool;
 
-public class ObjectPoolManager : MonoBehaviour
+public class ObjectPoolManager : Singleton<ObjectPoolManager>
 {
-    public static ObjectPoolManager Instance;
-
     private Dictionary<GameObject, ObjectPool<GameObject>> objectPoolDict = new();
     private Dictionary<GameObject, GameObject> clonePrefabDict = new();
-
-    private void Awake()
-    {
-        Instance = this;
-    }
-
     private void CreatePool(GameObject prefab, Vector3 pos, Quaternion rot)
     {
         ObjectPool<GameObject> pool = new ObjectPool<GameObject>

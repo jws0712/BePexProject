@@ -1,12 +1,12 @@
+//System
 using System.Collections;
 using System.Collections.Generic;
 
+//UnityEngine
 using UnityEngine;
 
-public class SoundManager : MonoBehaviour
+public class SoundManager : Singleton<SoundManager>
 {
-    public static SoundManager Instance;
-
     [SerializeField] private float musicOffset;
 
     [SerializeField] private AudioSource bgmSource;
@@ -30,12 +30,6 @@ public class SoundManager : MonoBehaviour
             return 0;
         }
     }     
-
-
-    private void Awake()
-    {
-        Instance = this;
-    }
 
     private void Start()
     {

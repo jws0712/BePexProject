@@ -1,9 +1,15 @@
+//System
 using System.Collections;
 using System.Collections.Generic;
-using TMPro;
+
+//UnityEngine
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
+
+//TMP
+using TMPro;
+
 
 public class UIManager : MonoBehaviour
 {

@@ -13,10 +13,8 @@ public enum GameStateType
     End,
 }
 
-public class GameManager : MonoBehaviour
+public class GameManager : Singleton<GameManager>
 {
-    public static GameManager Instance;
-
     [Header("GameSetting")]
     [SerializeField] private float musicBpm;
     [SerializeField] private float noteSpeed;
@@ -47,13 +45,12 @@ public class GameManager : MonoBehaviour
     public GameStateType GameState => gameState;
 
 
-    private void Awake()
+    public override void Awake()
     {
-        Instance = this;
+        base.Awake();
 
         Application.targetFrameRate = gameFrameRate;
     }
-
     private void Start()
     {
         //한 박자에 몇초 걸리는지 계산

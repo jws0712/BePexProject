@@ -1,6 +1,4 @@
-using System.Collections;
-using System.Collections.Generic;
-
+//UnityEngine
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -10,7 +8,7 @@ public class PlayerController : MonoBehaviour
     {
         if(Input.GetKeyDown(KeyCode.D))
         {
-            JudgementManager.Instance.JudgeNote();
+            JudgeManager.Instance.JudgeNote();
         }
 
         if(Input.touchCount > 0)
@@ -22,7 +20,7 @@ public class PlayerController : MonoBehaviour
 
             if(touch.phase == TouchPhase.Began)
             {
-                JudgementManager.Instance.JudgeNote();
+                JudgeManager.Instance.JudgeNote();
             }
         }
     }

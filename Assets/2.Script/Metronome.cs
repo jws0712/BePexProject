@@ -1,10 +1,9 @@
+//UnityEngine
 using UnityEngine;
 
 public class Metronome : MonoBehaviour
 {
     [SerializeField] private GameObject notePrefab;
-
-    private int lastBeat;
 
     private float nextBeatPos;
     private float beatPerSec;
@@ -35,7 +34,6 @@ public class Metronome : MonoBehaviour
             AddressableManager.Instance.LoadNoteObject(noteSpwanPos);
 
             nextBeatPos += beatPerSec;
-            lastBeat++;
         }
     }
 }

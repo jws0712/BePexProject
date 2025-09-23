@@ -2,8 +2,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using UnityEditor.Experimental.GraphView;
-
 
 //UnityEngine
 using UnityEngine;
@@ -23,10 +21,8 @@ public struct JudgeData
     public float distance;
 }
 
-public class JudgementManager : MonoBehaviour
+public class JudgeManager : Singleton<JudgeManager>
 {
-    public static JudgementManager Instance;
-
     [SerializeField] private JudgeData[] judgeDatas;
     [SerializeField] private GameObject judgeEffect;
 
@@ -38,11 +34,6 @@ public class JudgementManager : MonoBehaviour
     public JudgeType JudgeResult => judgeResult;
 
     public Queue<Note> NoteQueue => noteQueue;
-
-    private void Awake()
-    {
-        Instance = this;
-    }
 
     private void Start()
     {
@@ -75,11 +66,13 @@ public class JudgementManager : MonoBehaviour
             if ((center.position.y + judgeDatas[j].distance) >= notePosY
              && (center.position.y - judgeDatas[j].distance) <= notePosY)
             {
+                //노트 오브젝트 메모리 해제
                 AddressableManager.Instance.ReleaseObject(currentNote.gameObject);
-                SoundManager.Instance.PlaySFX(sfx);
 
                 //이펙트 소환
                 ObjectPoolManager.Instance.SpawnObject(judgeEffect, center.position, Quaternion.identity);
+
+                SoundManager.Instance.PlaySFX(sfx);
 
                 judgeResult = judgeDatas[j].type;
                 noteQueue.Dequeue();

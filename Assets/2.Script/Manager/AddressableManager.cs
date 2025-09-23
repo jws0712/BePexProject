@@ -7,19 +7,13 @@ using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
 
-public class AddressableManager : MonoBehaviour
+public class AddressableManager : Singleton<AddressableManager>
 {
-    public static AddressableManager Instance;
-
     [SerializeField] private AssetReferenceGameObject noteObj;
+
     private AsyncOperationHandle<GameObject> noteHandle;
 
     private List<GameObject> loadedObjectList = new();
-
-    private void Awake()
-    {
-        Instance = this;
-    }
 
     private IEnumerator Start()
     {
@@ -30,6 +24,7 @@ public class AddressableManager : MonoBehaviour
     {
         if(noteHandle.IsValid()) Addressables.Release(noteHandle);
     }
+
     private IEnumerator PreloadNoteObject()
     {
         noteHandle = Addressables.LoadAssetAsync<GameObject>(noteObj);
@@ -48,7 +43,7 @@ public class AddressableManager : MonoBehaviour
     {
         noteObj.InstantiateAsync(transform.position, Quaternion.identity).Completed += (obj) =>
         {
-            if (obj.Result.TryGetComponent(out Note note)) JudgementManager.Instance.NoteQueue.Enqueue(note);
+            if (obj.Result.TryGetComponent(out Note note)) JudgeManager.Instance.NoteQueue.Enqueue(note);
             loadedObjectList.Add(obj.Result);
         };
     }
