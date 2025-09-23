@@ -32,8 +32,7 @@ public class Metronome : MonoBehaviour
         if (songPos >= nextBeatPos)
         {
             //노트 생성
-            GameObject currentNote = Instantiate(notePrefab, noteSpwanPos.position, Quaternion.identity);
-            if(currentNote.TryGetComponent(out Note note)) JudgementManager.Instance.NoteQueue.Enqueue(note);
+            AddressableManager.Instance.LoadNoteObject(noteSpwanPos);
 
             nextBeatPos += beatPerSec;
             lastBeat++;

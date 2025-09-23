@@ -89,7 +89,7 @@ public class JudgementManager : MonoBehaviour
         {
             noteQueue.Dequeue();
             judgeResult = JudgeType.Bad;
-            Destroy(note.gameObject);
+            AddressableManager.Instance.ReleaseObject(note.gameObject);
         }
     }
 }
