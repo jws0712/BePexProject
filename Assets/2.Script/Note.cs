@@ -9,7 +9,6 @@ public class Note : MonoBehaviour
 
     private double noteHitTime;
 
-    private AudioClip sfx;
     private SpriteRenderer spriteRenderer;
 
     public SpriteRenderer Renderer => spriteRenderer;
@@ -21,7 +20,6 @@ public class Note : MonoBehaviour
         spriteRenderer = GetComponent<SpriteRenderer>();
         noteSpeed = GameManager.Instance.NoteSpeed;
         noteHitTime = SoundManager.Instance.SongPosition + GameManager.Instance.NoteHitTime;
-        sfx = GameManager.Instance.NoteHitSfx;
     }
 
     private void Update()
@@ -32,10 +30,7 @@ public class Note : MonoBehaviour
 
     public void HideNote()
     {
-        if (spriteRenderer.sprite == null) return;
 
-        spriteRenderer.sprite = null;
-        SoundManager.Instance.PlaySFX(sfx);
     }
 
     private void OnBecameInvisible()

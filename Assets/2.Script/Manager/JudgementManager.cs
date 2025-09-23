@@ -2,6 +2,8 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor.Experimental.GraphView;
+
 
 //UnityEngine
 using UnityEngine;
@@ -28,6 +30,7 @@ public class JudgementManager : MonoBehaviour
     [SerializeField] private JudgeData[] judgeDatas;
     [SerializeField] private GameObject judgeEffect;
 
+    private AudioClip sfx;
     private Transform center;
     private Queue<Note> noteQueue = new();
     private JudgeType judgeResult;
@@ -44,6 +47,7 @@ public class JudgementManager : MonoBehaviour
     private void Start()
     {
         center = GameManager.Instance.Center;
+        sfx = GameManager.Instance.NoteHitSfx;
     }
 
     private void Update()
@@ -71,10 +75,11 @@ public class JudgementManager : MonoBehaviour
             if ((center.position.y + judgeDatas[j].distance) >= notePosY
              && (center.position.y - judgeDatas[j].distance) <= notePosY)
             {
-                currentNote.HideNote();
+                AddressableManager.Instance.ReleaseObject(currentNote.gameObject);
+                SoundManager.Instance.PlaySFX(sfx);
 
                 //ÀÌÆåÆ® ¼ÒÈ¯
-                Instantiate(judgeEffect, center.position, Quaternion.identity);
+                ObjectPoolManager.Instance.SpawnObject(judgeEffect, center.position, Quaternion.identity);
 
                 judgeResult = judgeDatas[j].type;
                 noteQueue.Dequeue();
