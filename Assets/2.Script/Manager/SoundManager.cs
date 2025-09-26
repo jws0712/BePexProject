@@ -7,7 +7,6 @@ using UnityEngine;
 
 public class SoundManager : Singleton<SoundManager>
 {
-    [SerializeField] private float musicOffset;
 
     [SerializeField] private AudioSource bgmSource;
     [SerializeField] private AudioSource sfxSource;
@@ -50,10 +49,16 @@ public class SoundManager : Singleton<SoundManager>
     private void Update()
     {
         if (GameManager.Instance.GameState == GameStateType.Pause) return;
-        songPosition = (AudioSettings.dspTime - startDpsTime) * musicPitch - musicOffset;
+        songPosition = ((AudioSettings.dspTime - startDpsTime) * musicPitch) - GameManager.Instance.MusicOffset;
     }
 
     //À½¾Ç Àç»ý
+    public void PlayMusic(AudioClip clip)
+    {
+        bgmSource.clip = clip;
+        bgmSource.Play();
+    }
+
     public void PlayMusic(AudioClip clip, double delayTime)
     {
         bgmSource.clip = clip;

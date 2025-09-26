@@ -1,39 +1,36 @@
-//System
-using System.Collections;
-using System.Collections.Generic;
-using System.Data;
-using UnityEditor.Build.Content;
-using UnityEditor.U2D;
-
-
-
 //UnityEngine
 using UnityEngine;
 
 public class Note : MonoBehaviour
 {
-    private double spawnTime;
+    private int noteHitLine;
+    private double noteSpawnTime;
     private double noteHitTime;
 
     private bool isQuit;
 
     public double NoteHitTime => noteHitTime;
+    public int NoteHitLine => noteHitLine;
 
-    private void OnEnable()
+    public void Initialize(int hitLine, double spawnTime)
     {
-        Debug.Log(SoundManager.Instance.SongPosition);
-
-        spawnTime = SoundManager.Instance.SongPosition;
-        noteHitTime = spawnTime + GameManager.Instance.NoteTravelTime;
+        noteHitLine = hitLine;
+        noteSpawnTime = spawnTime;
+        noteHitTime = noteSpawnTime + GameManager.Instance.NoteTravelTime;
     }
 
     private void Update()
     {
         if (GameManager.Instance.GameState == GameStateType.Pause) return;
 
-        double t = (SoundManager.Instance.SongPosition - spawnTime) / GameManager.Instance.NoteTravelTime;
+        double t = (SoundManager.Instance.SongPosition - noteSpawnTime) / GameManager.Instance.NoteTravelTime;
 
-        transform.position = Vector3.LerpUnclamped(GameManager.Instance.NoteSpawnTransform.position, GameManager.Instance.Center.position, (float)t);
+        float targetY = Mathf.LerpUnclamped(
+            GameManager.Instance.NoteSpawnTransformCenter.position.y, 
+            GameManager.Instance.Center.position.y, 
+            (float)t);
+
+        transform.position = new Vector2(transform.position.x, targetY);
     }
 
     private void OnApplicationQuit()

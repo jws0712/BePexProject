@@ -1,6 +1,8 @@
 //System
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor.Search;
+
 
 //UnityEngine
 using UnityEngine;
@@ -39,13 +41,14 @@ public class AddressableManager : Singleton<AddressableManager>
     }
     
     //메모리 로드된 오브젝트 
-    public void LoadNoteObject(Transform transform)
+    public void LoadNoteObject(int lineIndex, Transform transform)
     {
         noteObj.InstantiateAsync(transform.position, Quaternion.identity).Completed += (obj) =>
         {
             if (obj.Result.TryGetComponent(out Note note))
             {
-                JudgeManager.Instance.NoteQueue.Enqueue(note);
+                note.Initialize(lineIndex, SoundManager.Instance.SongPosition);
+                JudgeManager.Instance.NoteQueues[lineIndex].Enqueue(note);
             }
             loadedObjectList.Add(obj.Result);
         };

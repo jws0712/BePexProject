@@ -62,12 +62,11 @@ public class ObjectPoolManager : Singleton<ObjectPoolManager>
             if(!clonePrefabDict.ContainsKey(obj))
             {
                 clonePrefabDict.Add(obj, spawnObj);
-
-                obj.transform.position = spawnPos;
-                obj.transform.rotation = spawnRot;
-
-                return obj;
             }
+
+            obj.transform.SetPositionAndRotation(spawnPos, spawnRot);
+
+            return obj;
         }
 
         return null;

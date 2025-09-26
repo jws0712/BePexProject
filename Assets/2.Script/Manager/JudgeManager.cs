@@ -26,37 +26,51 @@ public class JudgeManager : Singleton<JudgeManager>
     [SerializeField] private JudgeData[] judgeDatas;
     [SerializeField] private GameObject judgeEffect;
 
-    private AudioClip sfx;
     private Transform center;
-    private Queue<Note> noteQueue = new();
+
+    private Queue<Note>[] noteQueues = 
+    { 
+        new Queue<Note>(),
+        new Queue<Note>(),
+        new Queue<Note>(),
+        new Queue<Note>(),
+    };
+
     private JudgeType judgeResult;
 
     public JudgeType JudgeResult => judgeResult;
 
-    public Queue<Note> NoteQueue => noteQueue;
+    public Queue<Note>[] NoteQueues => noteQueues;
 
     private void Start()
     {
         center = GameManager.Instance.Center;
-        sfx = GameManager.Instance.NoteHitSfx;
     }
 
     private void Update()
     {
-        if (!GameManager.Instance.IsAuto || noteQueue.Count == 0) return;
+        if (!GameManager.Instance.IsAuto) return;
 
-        if(SoundManager.Instance.SongPosition > noteQueue.Peek().NoteHitTime)
+        for(int i = 0; i < noteQueues.Length; i++)
         {
-            JudgeNote();
+            Queue<Note> queue = noteQueues[i];
+
+            //요소가 없는 Queue 넘기기
+            if(queue.Count == 0) continue;
+
+            if (SoundManager.Instance.SongPosition >= queue.Peek().NoteHitTime)
+            {
+                JudgeNote(i);
+            }
         }
     }
 
     //노트 판정
-    public void JudgeNote()
+    public void JudgeNote(int lineIndex)
     {
-        if (noteQueue.Count == 0) return;
+        if (noteQueues[lineIndex].Count == 0) return;
 
-        Note currentNote = noteQueue.Peek();
+        Note currentNote = noteQueues[lineIndex].Peek();
 
         float notePosY = currentNote.gameObject.transform.position.y;
 
@@ -70,12 +84,14 @@ public class JudgeManager : Singleton<JudgeManager>
                 AddressableManager.Instance.ReleaseObject(currentNote.gameObject);
 
                 //이펙트 소환
-                ObjectPoolManager.Instance.SpawnObject(judgeEffect, center.position, Quaternion.identity);
+                ObjectPoolManager.Instance.SpawnObject(judgeEffect, new Vector2(GameManager.Instance.NoteSpawnTransforms[lineIndex].position.x, center.position.y), Quaternion.identity);
+                Debug.Log(new Vector2(GameManager.Instance.NoteSpawnTransforms[lineIndex].position.x, center.position.y));
 
-                SoundManager.Instance.PlaySFX(sfx);
+                //효과음 재생
+                SoundManager.Instance.PlaySFX(GameManager.Instance.NoteHitSfx);
 
                 judgeResult = judgeDatas[j].type;
-                noteQueue.Dequeue();
+                noteQueues[lineIndex].Dequeue();
                 return;
             }
         }
@@ -83,10 +99,14 @@ public class JudgeManager : Singleton<JudgeManager>
 
     public void JudgeNoteOutCamera(Note note)
     {
-        if(noteQueue.Count > 0 && noteQueue.Peek() == note)
+        int index = note.NoteHitLine;
+
+        if (noteQueues[index].Count > 0 && noteQueues[index].Peek() == note)
         {
-            noteQueue.Dequeue();
+            noteQueues[index].Dequeue();
+
             judgeResult = JudgeType.Bad;
+
             AddressableManager.Instance.ReleaseObject(note.gameObject);
         }
     }

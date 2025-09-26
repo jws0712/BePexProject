@@ -11,13 +11,21 @@ public enum GameStateType
     Play,
     Pause,
     End,
-}
+}  
 
+public enum LineType
+{
+    One,
+    Two,
+    Three,
+    Four
+} 
 public class GameManager : Singleton<GameManager>
 {
     [Header("GameSetting")]
     [SerializeField] private float musicBpm;
     [SerializeField] private float gameSpeed;
+    [SerializeField] private float musicOffset;
     [SerializeField] private int gameFrameRate = 60;
 
     [Header("Clip")]
@@ -26,7 +34,8 @@ public class GameManager : Singleton<GameManager>
 
     [Header("Transform")]
     [SerializeField] private Transform center;
-    [SerializeField] private Transform noteSpawnTransform;
+    [SerializeField] private Transform noteSpawnTransformCenter;
+    [SerializeField] private Transform[] noteSpawnTransforms;
 
     [SerializeField] private bool isAuto;
 
@@ -37,13 +46,14 @@ public class GameManager : Singleton<GameManager>
     private double songPos;
 
     private GameStateType gameState;
-
+    public float MusicOffset => musicOffset;
     public float GameSpeed => gameSpeed;
     public bool IsAuto => isAuto;
     public double NoteTravelTime => noteTravelTime;
     public AudioClip NoteHitSfx => noteHitSfx;
     public Transform Center => center;
-    public Transform NoteSpawnTransform => noteSpawnTransform;
+    public Transform NoteSpawnTransformCenter => noteSpawnTransformCenter;
+    public Transform[] NoteSpawnTransforms => noteSpawnTransforms;
     public GameStateType GameState => gameState;
 
 
@@ -61,7 +71,7 @@ public class GameManager : Singleton<GameManager>
         //한 박자에 몇초 걸리는지 계산
         secPerBeat = 60 / musicBpm;
 
-        noteTravelTime = (noteSpawnTransform.position.y - center.position.y) / (gameSpeed * SoundManager.Instance.MusicPitch);
+        noteTravelTime = (noteSpawnTransformCenter.position.y - center.position.y) / (gameSpeed * SoundManager.Instance.MusicPitch);
 
         double delayTime = AudioSettings.dspTime + noteTravelTime;
 
@@ -73,12 +83,14 @@ public class GameManager : Singleton<GameManager>
     {
         songPos = SoundManager.Instance.SongPosition;
 
-        if (GameState == GameStateType.Pause || songPos >= SoundManager.Instance.MusicLength) return;
+        if (GameState == GameStateType.Pause || songPos > SoundManager.Instance.MusicLength) return;
 
-        if (songPos >= nextBeatPos)
+        if (songPos > nextBeatPos)
         {
-            //노트 생성
-            AddressableManager.Instance.LoadNoteObject(noteSpawnTransform);
+            for(int i = 0; i < JudgeManager.Instance.NoteQueues.Length; i++)
+            {
+                AddressableManager.Instance.LoadNoteObject(i, noteSpawnTransforms[i]);
+            }
 
             nextBeatPos += secPerBeat;
         }
