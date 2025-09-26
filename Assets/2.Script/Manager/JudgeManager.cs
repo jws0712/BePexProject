@@ -24,7 +24,11 @@ public struct JudgeData
 public class JudgeManager : Singleton<JudgeManager>
 {
     [SerializeField] private JudgeData[] judgeDatas;
+    [SerializeField] private GameObject hitEffect;
     [SerializeField] private GameObject judgeEffect;
+    [SerializeField] private Transform canvas;
+
+    private int comboCount;
 
     private Transform center;
 
@@ -37,8 +41,11 @@ public class JudgeManager : Singleton<JudgeManager>
     };
 
     private JudgeType judgeResult;
+    private JudgeType lastJudgeResult;
 
     public JudgeType JudgeResult => judgeResult;
+
+    public int ComboCount => comboCount;
 
     public Queue<Note>[] NoteQueues => noteQueues;
 
@@ -84,13 +91,19 @@ public class JudgeManager : Singleton<JudgeManager>
                 AddressableManager.Instance.ReleaseObject(currentNote.gameObject);
 
                 //이펙트 소환
-                ObjectPoolManager.Instance.SpawnObject(judgeEffect, new Vector2(GameManager.Instance.NoteSpawnTransforms[lineIndex].position.x, center.position.y), Quaternion.identity);
-                Debug.Log(new Vector2(GameManager.Instance.NoteSpawnTransforms[lineIndex].position.x, center.position.y));
+                ObjectPoolManager.Instance.SpawnObject(hitEffect, new Vector2(GameManager.Instance.NoteSpawnTransforms[lineIndex].position.x, center.position.y), Quaternion.identity);
+
+                judgeResult = judgeDatas[j].type;
+
+                GameObject effect = ObjectPoolManager.Instance.SpawnObject(judgeEffect, Vector2.zero, Quaternion.identity);
+                effect.transform.SetParent(canvas);
 
                 //효과음 재생
                 SoundManager.Instance.PlaySFX(GameManager.Instance.NoteHitSfx);
 
-                judgeResult = judgeDatas[j].type;
+                comboCount++;
+
+
                 noteQueues[lineIndex].Dequeue();
                 return;
             }
@@ -106,6 +119,11 @@ public class JudgeManager : Singleton<JudgeManager>
             noteQueues[index].Dequeue();
 
             judgeResult = JudgeType.Bad;
+
+            comboCount = 0;
+
+            GameObject effect = ObjectPoolManager.Instance.SpawnObject(judgeEffect, Vector2.zero, Quaternion.identity);
+            effect.transform.SetParent(canvas);
 
             AddressableManager.Instance.ReleaseObject(note.gameObject);
         }

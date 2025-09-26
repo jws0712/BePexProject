@@ -9,7 +9,7 @@ public class Effect : MonoBehaviour
 {
     [SerializeField] private float destroyTime;
 
-    private void OnEnable()
+    protected virtual void OnEnable()
     {
         StartCoroutine(Co_Destroy());
     }
