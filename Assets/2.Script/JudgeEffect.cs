@@ -8,17 +8,13 @@ using UnityEngine;
 //TMP
 using TMPro;
 
-public class JudgeEffect : Effect
+public class JudgeEffect : MonoBehaviour
 {
     [SerializeField] private TextMeshProUGUI judge;
     [SerializeField] private TextMeshProUGUI combo;
 
-    protected override void OnEnable()
+    private void OnEnable()
     {
-        base.OnEnable();
-
-        Debug.Log(JudgeManager.Instance.JudgeResult.ToString());
-
         switch(JudgeManager.Instance.JudgeResult)
         {
             case JudgeType.Perfect:
@@ -50,7 +46,7 @@ public class JudgeEffect : Effect
     private void SetEffect(bool isEnableComboText, Color textColor, string judgeText)
     {
         combo.enabled = isEnableComboText;
-        combo.text = JudgeManager.Instance.ComboCount.ToString();
+        combo.text = JudgeManager.Instance.ComboCount.ToString("D2");
 
         judge.color = textColor;
         judge.text = judgeText;

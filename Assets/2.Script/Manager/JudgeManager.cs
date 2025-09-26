@@ -31,6 +31,7 @@ public class JudgeManager : Singleton<JudgeManager>
     private int comboCount;
 
     private Transform center;
+    private GameObject currentJudgeEffect;
 
     private Queue<Note>[] noteQueues = 
     { 
@@ -41,7 +42,6 @@ public class JudgeManager : Singleton<JudgeManager>
     };
 
     private JudgeType judgeResult;
-    private JudgeType lastJudgeResult;
 
     public JudgeType JudgeResult => judgeResult;
 
@@ -56,14 +56,19 @@ public class JudgeManager : Singleton<JudgeManager>
 
     private void Update()
     {
+        NoteHitAuto();
+    }
+
+    //자동으로 노트 판정
+    private void NoteHitAuto()
+    {
         if (!GameManager.Instance.IsAuto) return;
 
-        for(int i = 0; i < noteQueues.Length; i++)
+        for (int i = 0; i < noteQueues.Length; i++)
         {
             Queue<Note> queue = noteQueues[i];
 
-            //요소가 없는 Queue 넘기기
-            if(queue.Count == 0) continue;
+            if (queue.Count == 0) continue;
 
             if (SoundManager.Instance.SongPosition >= queue.Peek().NoteHitTime)
             {
@@ -87,22 +92,19 @@ public class JudgeManager : Singleton<JudgeManager>
             if ((center.position.y + judgeDatas[j].distance) >= notePosY
              && (center.position.y - judgeDatas[j].distance) <= notePosY)
             {
+                comboCount++;
+
                 //노트 오브젝트 메모리 해제
                 AddressableManager.Instance.ReleaseObject(currentNote.gameObject);
+
 
                 //이펙트 소환
                 ObjectPoolManager.Instance.SpawnObject(hitEffect, new Vector2(GameManager.Instance.NoteSpawnTransforms[lineIndex].position.x, center.position.y), Quaternion.identity);
 
-                judgeResult = judgeDatas[j].type;
-
-                GameObject effect = ObjectPoolManager.Instance.SpawnObject(judgeEffect, Vector2.zero, Quaternion.identity);
-                effect.transform.SetParent(canvas);
+                SpawnJudgeEffect(judgeDatas[j].type);
 
                 //효과음 재생
                 SoundManager.Instance.PlaySFX(GameManager.Instance.NoteHitSfx);
-
-                comboCount++;
-
 
                 noteQueues[lineIndex].Dequeue();
                 return;
@@ -110,22 +112,35 @@ public class JudgeManager : Singleton<JudgeManager>
         }
     }
 
+    //카메라에서 나갔을때 노트 판정
     public void JudgeNoteOutCamera(Note note)
     {
         int index = note.NoteHitLine;
 
         if (noteQueues[index].Count > 0 && noteQueues[index].Peek() == note)
         {
-            noteQueues[index].Dequeue();
-
-            judgeResult = JudgeType.Bad;
-
             comboCount = 0;
 
-            GameObject effect = ObjectPoolManager.Instance.SpawnObject(judgeEffect, Vector2.zero, Quaternion.identity);
-            effect.transform.SetParent(canvas);
+            noteQueues[index].Dequeue();
+
+            SpawnJudgeEffect(JudgeType.Bad);
 
             AddressableManager.Instance.ReleaseObject(note.gameObject);
         }
+    }
+
+    //판정이펙트 설정및 소환
+    private void SpawnJudgeEffect(JudgeType judge)
+    {
+        judgeResult = judge;
+
+        if (currentJudgeEffect != null)
+        {
+            ObjectPoolManager.Instance.ReturnObjectToPool(currentJudgeEffect);
+            currentJudgeEffect = null;
+        }
+
+        currentJudgeEffect = ObjectPoolManager.Instance.SpawnObject(judgeEffect, Vector2.zero, Quaternion.identity);
+        currentJudgeEffect.transform.SetParent(canvas);
     }
 }
