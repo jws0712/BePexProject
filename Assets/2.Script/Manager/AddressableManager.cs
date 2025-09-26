@@ -43,7 +43,10 @@ public class AddressableManager : Singleton<AddressableManager>
     {
         noteObj.InstantiateAsync(transform.position, Quaternion.identity).Completed += (obj) =>
         {
-            if (obj.Result.TryGetComponent(out Note note)) JudgeManager.Instance.NoteQueue.Enqueue(note);
+            if (obj.Result.TryGetComponent(out Note note))
+            {
+                JudgeManager.Instance.NoteQueue.Enqueue(note);
+            }
             loadedObjectList.Add(obj.Result);
         };
     }

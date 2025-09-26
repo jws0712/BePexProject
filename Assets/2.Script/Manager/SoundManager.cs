@@ -16,7 +16,11 @@ public class SoundManager : Singleton<SoundManager>
     private double startDpsTime;
     private double songPosition;
 
+    private float musicPitch;
+
     public double SongPosition => songPosition;
+
+    public float MusicPitch => musicPitch;
 
     public float MusicLength
     {
@@ -29,19 +33,24 @@ public class SoundManager : Singleton<SoundManager>
 
             return 0;
         }
-    }     
+    }
+
+    public override void Awake()
+    {
+        base.Awake();
+
+        musicPitch = bgmSource.pitch;
+    }
 
     private void Start()
     {
-        //게임 시작 시간 저장
         startDpsTime = AudioSettings.dspTime;
     }
 
     private void Update()
     {
         if (GameManager.Instance.GameState == GameStateType.Pause) return;
-        //이미 흐른 시간을 현재 흐르고 있는 시간을 빼서 현재 시간을 구함
-        songPosition = (AudioSettings.dspTime - startDpsTime) - musicOffset * bgmSource.pitch;
+        songPosition = (AudioSettings.dspTime - startDpsTime) * musicPitch - musicOffset;
     }
 
     //음악 재생
@@ -51,10 +60,8 @@ public class SoundManager : Singleton<SoundManager>
         bgmSource.PlayScheduled(delayTime);
     }
 
-    //음악 일시정지
     public void PauseMusic()
     {
-        //일시정지 버튼을 누른 시간을 계산
         pauseOffset = AudioSettings.dspTime - startDpsTime;
         bgmSource.Pause();
     }
@@ -62,7 +69,6 @@ public class SoundManager : Singleton<SoundManager>
     //음악 일시정지 풀기
     public void UnPauseMusic()
     {
-        //게임 시작 시간에 일시정지 상태인 동안의 시간을 빼서 게임 시작 시간을 다시 계산
         startDpsTime = (float)AudioSettings.dspTime - pauseOffset;
         bgmSource.UnPause();
     }

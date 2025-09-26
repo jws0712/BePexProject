@@ -17,7 +17,7 @@ public class GameManager : Singleton<GameManager>
 {
     [Header("GameSetting")]
     [SerializeField] private float musicBpm;
-    [SerializeField] private float noteSpeed;
+    [SerializeField] private float gameSpeed;
     [SerializeField] private int gameFrameRate = 60;
 
     [Header("Clip")]
@@ -26,22 +26,24 @@ public class GameManager : Singleton<GameManager>
 
     [Header("Transform")]
     [SerializeField] private Transform center;
-    [SerializeField] private Transform noteSpawnPos;
+    [SerializeField] private Transform noteSpawnTransform;
 
     [SerializeField] private bool isAuto;
 
-    private float beatPerSec;
-    private float noteHitTime;
+    private float secPerBeat;
+    private float nextBeatPos;
+    private float noteTravelTime;
+
+    private double songPos;
 
     private GameStateType gameState;
 
-    public float BeatPerSec => beatPerSec;
-    public float NoteSpeed => noteSpeed;
-    public float NoteHitTime => noteHitTime;
+    public float GameSpeed => gameSpeed;
     public bool IsAuto => isAuto;
+    public double NoteTravelTime => noteTravelTime;
     public AudioClip NoteHitSfx => noteHitSfx;
     public Transform Center => center;
-    public Transform NoteSpawnPos => noteSpawnPos;
+    public Transform NoteSpawnTransform => noteSpawnTransform;
     public GameStateType GameState => gameState;
 
 
@@ -49,14 +51,37 @@ public class GameManager : Singleton<GameManager>
     {
         base.Awake();
 
+
         Application.targetFrameRate = gameFrameRate;
     }
     private void Start()
     {
-        //한 박자에 몇초 걸리는지 계산
-        beatPerSec = 60 / musicBpm;
+        gameState = GameStateType.Play;
 
-        StartMusic();
+        //한 박자에 몇초 걸리는지 계산
+        secPerBeat = 60 / musicBpm;
+
+        noteTravelTime = (noteSpawnTransform.position.y - center.position.y) / (gameSpeed * SoundManager.Instance.MusicPitch);
+
+        double delayTime = AudioSettings.dspTime + noteTravelTime;
+
+        //딜레이 시간만큼 멈췄다가 음악 실행
+        SoundManager.Instance.PlayMusic(music, delayTime);
+    }
+
+    private void Update()
+    {
+        songPos = SoundManager.Instance.SongPosition;
+
+        if (GameState == GameStateType.Pause || songPos >= SoundManager.Instance.MusicLength) return;
+
+        if (songPos >= nextBeatPos)
+        {
+            //노트 생성
+            AddressableManager.Instance.LoadNoteObject(noteSpawnTransform);
+
+            nextBeatPos += secPerBeat;
+        }
     }
 
     //일시정지
@@ -71,18 +96,5 @@ public class GameManager : Singleton<GameManager>
     {
         gameState = GameStateType.Play;
         SoundManager.Instance.UnPauseMusic();
-    }
-
-    //딜레이 후 음악 재생
-    private void StartMusic()
-    {
-        //노트 스폰 위치에서 판정선 까지 가는데 걸리는 시간을 계산
-        noteHitTime = (noteSpawnPos.position.y - center.position.y) / noteSpeed;
-
-        //현재까지 오디오 엔진이 실행된 시간에 노트가 판정선 까지 가는데 걸리는 시간과 한 박자에 걸리는 시간을 더해 음악 딜레이 시간을 구함
-        double delayTime = AudioSettings.dspTime + (noteHitTime + beatPerSec);
-
-        //딜레이 시간만큼 멈췄다가 음악 실행
-        SoundManager.Instance.PlayMusic(music, delayTime);
     }
 }
