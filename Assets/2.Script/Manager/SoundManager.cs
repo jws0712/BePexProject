@@ -1,25 +1,14 @@
-//System
-using System.Collections;
-using System.Collections.Generic;
-
 //UnityEngine
 using UnityEngine;
 
 public class SoundManager : Singleton<SoundManager>
 {
-
     [SerializeField] private AudioSource bgmSource;
     [SerializeField] private AudioSource sfxSource;
 
-    private double pauseOffset;
-    private double startDpsTime;
-    private double songPosition;
+    private bool isPlayMusicWithDelay;
 
-    private float musicPitch;
-
-    public double SongPosition => songPosition;
-
-    public float MusicPitch => musicPitch;
+    private double delayTime;
 
     public float MusicLength
     {
@@ -34,22 +23,21 @@ public class SoundManager : Singleton<SoundManager>
         }
     }
 
-    public override void Awake()
-    {
-        base.Awake();
-
-        musicPitch = bgmSource.pitch;
-    }
-
     private void Start()
     {
-        startDpsTime = AudioSettings.dspTime;
+        bgmSource.pitch = GameManager.Instance.GameSpeedMultiplier;
     }
 
     private void Update()
     {
         if (GameManager.Instance.GameState == GameStateType.Pause) return;
-        songPosition = ((AudioSettings.dspTime - startDpsTime) * musicPitch) - GameManager.Instance.MusicOffset;
+
+        //µÙ∑π¿Ã Ω√∞£∏∏≈≠ ∏ÿ√Ë¥Ÿ∞° ¿Ωæ«¿Áª˝
+        if (isPlayMusicWithDelay && delayTime <= GameManager.Instance.SongPosition)
+        {
+            bgmSource.Play();
+            isPlayMusicWithDelay = false;
+        }
     }
 
     //¿Ωæ« ¿Áª˝
@@ -59,22 +47,23 @@ public class SoundManager : Singleton<SoundManager>
         bgmSource.Play();
     }
 
+    //µÙ∑π¿Ã »ƒ ¿Ωæ« ¿Áª˝
     public void PlayMusic(AudioClip clip, double delayTime)
     {
         bgmSource.clip = clip;
-        bgmSource.PlayScheduled(delayTime);
+        this.delayTime = delayTime;
+        isPlayMusicWithDelay = true;
     }
 
+    //¿Ωæ« ¿œΩ√¡§¡ˆ
     public void PauseMusic()
     {
-        pauseOffset = AudioSettings.dspTime - startDpsTime;
         bgmSource.Pause();
     }
 
     //¿Ωæ« ¿œΩ√¡§¡ˆ «Æ±‚
     public void UnPauseMusic()
     {
-        startDpsTime = (float)AudioSettings.dspTime - pauseOffset;
         bgmSource.UnPause();
     }
 

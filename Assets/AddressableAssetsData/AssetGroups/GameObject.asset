@@ -21,6 +21,14 @@ MonoBehaviour:
     m_Address: Assets/3.Prefab/Note.prefab
     m_ReadOnly: 0
     m_SerializedLabels: []
+  - m_GUID: 62bc425171c9c964ba37f4fde2b18e46
+    m_Address: Assets/3.Prefab/Note VFX.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+  - m_GUID: 11143c8a468c7c14793a078c53339a8a
+    m_Address: Assets/3.Prefab/JudgeEffect.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels: []
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: 578e7518245d69c47a8fbecaa66da691, type: 2}
   m_SchemaSet:

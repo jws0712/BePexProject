@@ -31,6 +31,7 @@ public class JudgeManager : Singleton<JudgeManager>
     private int comboCount;
 
     private Transform center;
+
     private GameObject currentJudgeEffect;
 
     private Queue<Note>[] noteQueues = 
@@ -43,20 +44,26 @@ public class JudgeManager : Singleton<JudgeManager>
 
     private JudgeType judgeResult;
 
+    public int ComboCount => comboCount;
+
     public JudgeType JudgeResult => judgeResult;
 
-    public int ComboCount => comboCount;
 
     public Queue<Note>[] NoteQueues => noteQueues;
 
     private void Start()
     {
-        center = GameManager.Instance.Center;
+        center = GameManager.Instance.JudgeLineCenter;
     }
 
     private void Update()
     {
         NoteHitAuto();
+
+        if(GameManager.Instance.GameState == GameStateType.Pause)
+        {
+            currentJudgeEffect = null;
+        }
     }
 
     //자동으로 노트 판정
@@ -70,7 +77,7 @@ public class JudgeManager : Singleton<JudgeManager>
 
             if (queue.Count == 0) continue;
 
-            if (SoundManager.Instance.SongPosition >= queue.Peek().NoteHitTime)
+            if (GameManager.Instance.SongPosition >= queue.Peek().NoteHitTime)
             {
                 JudgeNote(i);
             }
@@ -140,7 +147,7 @@ public class JudgeManager : Singleton<JudgeManager>
             currentJudgeEffect = null;
         }
 
-        currentJudgeEffect = ObjectPoolManager.Instance.SpawnObject(judgeEffect, Vector2.zero, Quaternion.identity);
+        currentJudgeEffect = ObjectPoolManager.Instance.SpawnObject(judgeEffect, canvas.transform.position, Quaternion.identity);
         currentJudgeEffect.transform.SetParent(canvas);
     }
 }

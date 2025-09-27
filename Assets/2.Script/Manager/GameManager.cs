@@ -7,7 +7,6 @@ using UnityEngine;
 
 public enum GameStateType
 {
-    Idle,
     Play,
     Pause,
     End,
@@ -15,77 +14,84 @@ public enum GameStateType
 
 public enum LineType
 {
-    One,
-    Two,
-    Three,
-    Four
+    One = 0,
+    Two = 1,
+    Three = 2,
+    Four = 3,
 } 
+
 public class GameManager : Singleton<GameManager>
 {
     [Header("GameSetting")]
     [SerializeField] private float musicBpm;
-    [SerializeField] private float gameSpeed;
+    [SerializeField] private float noteSpeed;
     [SerializeField] private float musicOffset;
-    [SerializeField] private int gameFrameRate = 60;
+    [SerializeField] private float gameSpeedMultiplier;
+
+    [SerializeField] private int gameFrameRate;
 
     [Header("Clip")]
     [SerializeField] private AudioClip music;
     [SerializeField] private AudioClip noteHitSfx;
 
     [Header("Transform")]
-    [SerializeField] private Transform center;
+    [SerializeField] private Transform judgeLineCenter;
     [SerializeField] private Transform noteSpawnTransformCenter;
     [SerializeField] private Transform[] noteSpawnTransforms;
 
+    [Header("AutoMode")]
     [SerializeField] private bool isAuto;
 
-    private float secPerBeat;
-    private float nextBeatPos;
-    private float noteTravelTime;
-
-    private double songPos;
+    private double secPerBeat;
+    private double nextBeatPos;
+    private double noteTravelTime;
+    private double songPosition;
+    private double startDspTime;
+    private double pauseOffset;
 
     private GameStateType gameState;
-    public float MusicOffset => musicOffset;
-    public float GameSpeed => gameSpeed;
+
     public bool IsAuto => isAuto;
+    public float GameSpeedMultiplier => gameSpeedMultiplier;
     public double NoteTravelTime => noteTravelTime;
+    public double SongPosition => songPosition;
     public AudioClip NoteHitSfx => noteHitSfx;
-    public Transform Center => center;
+    public Transform JudgeLineCenter => judgeLineCenter;
     public Transform NoteSpawnTransformCenter => noteSpawnTransformCenter;
     public Transform[] NoteSpawnTransforms => noteSpawnTransforms;
     public GameStateType GameState => gameState;
 
-
     public override void Awake()
     {
         base.Awake();
-
-
         Application.targetFrameRate = gameFrameRate;
     }
+
     private void Start()
     {
         gameState = GameStateType.Play;
 
-        //한 박자에 몇초 걸리는지 계산
         secPerBeat = 60 / musicBpm;
-
-        noteTravelTime = (noteSpawnTransformCenter.position.y - center.position.y) / (gameSpeed * SoundManager.Instance.MusicPitch);
-
-        double delayTime = AudioSettings.dspTime + noteTravelTime;
+        startDspTime = AudioSettings.dspTime;
+        noteTravelTime = (noteSpawnTransformCenter.position.y - judgeLineCenter.position.y) / (noteSpeed * gameSpeedMultiplier);
 
         //딜레이 시간만큼 멈췄다가 음악 실행
-        SoundManager.Instance.PlayMusic(music, delayTime);
+        SoundManager.Instance.PlayMusic(music, noteTravelTime);
     }
 
     private void Update()
     {
-        songPos = SoundManager.Instance.SongPosition;
+        if(songPosition > SoundManager.Instance.MusicLength - noteTravelTime)
+        {
+            gameState = GameStateType.End;
+            return;
+        }
+        if (gameState == GameStateType.Pause) return;
 
-        if (GameState == GameStateType.Pause || songPos > SoundManager.Instance.MusicLength) return;
+        songPosition = ((AudioSettings.dspTime - startDspTime) * gameSpeedMultiplier) - musicOffset;
 
-        if (songPos > nextBeatPos)
+        //박자 마다 노트 소환
+        if (songPosition > nextBeatPos)
         {
             for(int i = 0; i < JudgeManager.Instance.NoteQueues.Length; i++)
             {
@@ -100,13 +106,21 @@ public class GameManager : Singleton<GameManager>
     public void Pause()
     {
         gameState = GameStateType.Pause;
+        pauseOffset = AudioSettings.dspTime - startDspTime;
         SoundManager.Instance.PauseMusic();
     }
 
     //계속하기
-    public void Continue()
+    public void UnPause()
     {
         gameState = GameStateType.Play;
+        startDspTime = AudioSettings.dspTime - pauseOffset;
         SoundManager.Instance.UnPauseMusic();
+    }
+
+    //다시하기
+    public void ReStart()
+    {
+        //다시하기
     }
 }

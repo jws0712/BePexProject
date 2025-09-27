@@ -10,7 +10,6 @@ using UnityEngine.SceneManagement;
 //TMP
 using TMPro;
 
-
 public class UIManager : MonoBehaviour
 {
     [Header("Panel")]
@@ -28,31 +27,32 @@ public class UIManager : MonoBehaviour
     {
         pauseButton.onClick.AddListener(Pause);
         replayButton.onClick.AddListener(Replay);
-        continueButton.onClick.AddListener(Continue);
+        continueButton.onClick.AddListener(UnPause);
     }
 
     private void Update()
     {
-        timeText.text = SoundManager.Instance.SongPosition.ToString();
+        timeText.text = GameManager.Instance.SongPosition.ToString();
     }
 
     //일시정지 버튼 이벤트
-    public void Pause()
+    private void Pause()
     {
         pausePanel.SetActive(true);
         GameManager.Instance.Pause();
     }
 
-    //다시하기 버튼 이벤트
-    public void Replay()
-    {
-        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
-    }
-
     //계속하기 버튼 이벤트
-    public void Continue()
+    private void UnPause()
     {
         pausePanel.SetActive(false);
-        GameManager.Instance.Continue();
+        GameManager.Instance.UnPause();
     }
+
+    //다시하기 버튼 이벤트
+    private void Replay()
+    {
+        GameManager.Instance.ReStart();
+    }
+
 }

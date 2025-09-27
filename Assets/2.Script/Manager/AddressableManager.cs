@@ -1,8 +1,6 @@
 //System
 using System.Collections;
 using System.Collections.Generic;
-using UnityEditor.Search;
-
 
 //UnityEngine
 using UnityEngine;
@@ -47,7 +45,7 @@ public class AddressableManager : Singleton<AddressableManager>
         {
             if (obj.Result.TryGetComponent(out Note note))
             {
-                note.Initialize(lineIndex, SoundManager.Instance.SongPosition);
+                note.Initialize((LineType)lineIndex, GameManager.Instance.SongPosition);
                 JudgeManager.Instance.NoteQueues[lineIndex].Enqueue(note);
             }
             loadedObjectList.Add(obj.Result);
