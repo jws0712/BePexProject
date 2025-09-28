@@ -8,16 +8,14 @@ using UnityEngine;
 //TMP
 using TMPro;
 
-public class JudgeEffect : Effect
+public class JudgeEffect : MonoBehaviour
 {
     [SerializeField] private TextMeshProUGUI judge;
     [SerializeField] private TextMeshProUGUI combo;
 
 
-    protected override void OnEnable()
+    private void OnEnable()
     {
-        base.OnEnable();
-
         switch (JudgeManager.Instance.JudgeResult)
         {
             case JudgeType.Perfect:

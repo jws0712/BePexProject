@@ -6,6 +6,8 @@ public class SoundManager : Singleton<SoundManager>
     [SerializeField] private AudioSource bgmSource;
     [SerializeField] private AudioSource sfxSource;
 
+    private AudioClip currentSFXClip;
+
     private bool isPlayMusicWithDelay;
 
     private double delayTime;
@@ -53,6 +55,12 @@ public class SoundManager : Singleton<SoundManager>
         bgmSource.clip = clip;
         this.delayTime = delayTime;
         isPlayMusicWithDelay = true;
+    }
+
+    //음악 정지
+    public void StopMusic()
+    {
+        bgmSource.Stop();
     }
 
     //음악 일시정지

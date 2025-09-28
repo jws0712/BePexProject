@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 
+
 //UnityEngine
 using UnityEngine;
 using UnityEngine.AddressableAssets;
@@ -15,14 +16,18 @@ public class AddressableManager : Singleton<AddressableManager>
 
     private List<GameObject> loadedObjectList = new();
 
-    private IEnumerator Start()
+    private void Start()
     {
-        yield return PreloadNoteObject();
+        GameManager.Instance.AddGameEventListener(GameStateType.Restart, ReleaseAllObject);
+        StartCoroutine(PreloadNoteObject());
     }
 
     private void OnDestroy()
     {
         if(noteHandle.IsValid()) Addressables.Release(noteHandle);
+
+        if (GameManager.Instance == null) return;
+        GameManager.Instance.RemoveGameEventListener(GameStateType.Restart, ReleaseAllObject);
     }
 
     private IEnumerator PreloadNoteObject()
@@ -60,5 +65,15 @@ public class AddressableManager : Singleton<AddressableManager>
 
         Addressables.ReleaseInstance(obj);
         loadedObjectList.Remove(obj);
+    }
+
+    private void ReleaseAllObject()
+    {
+        foreach(var obj in loadedObjectList)
+        {
+            Addressables.ReleaseInstance(obj);
+        }
+
+        loadedObjectList.Clear();
     }
 }

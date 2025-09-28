@@ -52,6 +52,7 @@ public class UIManager : MonoBehaviour
     //다시하기 버튼 이벤트
     private void Replay()
     {
+        pausePanel.SetActive(false);
         GameManager.Instance.ReStart();
     }
 

@@ -10,6 +10,20 @@ public class ObjectPoolManager : Singleton<ObjectPoolManager>
 {
     private Dictionary<GameObject, ObjectPool<GameObject>> objectPoolDict = new();
     private Dictionary<GameObject, GameObject> clonePrefabDict = new();
+
+    private List<GameObject> activeObjectList = new();
+
+    private void Start()
+    {
+        GameManager.Instance.AddGameEventListener(GameStateType.Restart, ReturnAllObjectToPool);
+    }
+
+    private void OnDestroy()
+    {
+        if (GameManager.Instance == null) return;
+        GameManager.Instance.RemoveGameEventListener(GameStateType.Restart, ReturnAllObjectToPool);
+    }
+    
     private void CreatePool(GameObject prefab, Vector3 pos, Quaternion rot)
     {
         ObjectPool<GameObject> pool = new ObjectPool<GameObject>
@@ -48,6 +62,7 @@ public class ObjectPoolManager : Singleton<ObjectPoolManager>
         }
     }
 
+    //오브젝트를 풀에서 꺼내 배치
     public GameObject SpawnObject(GameObject spawnObj,  Vector3 spawnPos, Quaternion spawnRot)
     {
         if(!objectPoolDict.ContainsKey(spawnObj))
@@ -66,12 +81,14 @@ public class ObjectPoolManager : Singleton<ObjectPoolManager>
 
             obj.transform.SetPositionAndRotation(spawnPos, spawnRot);
 
+            activeObjectList.Add(obj);
             return obj;
         }
 
         return null;
     }
 
+    //오브젝트를 풀로 되돌림
     public void ReturnObjectToPool(GameObject obj)
     {
         if(clonePrefabDict.TryGetValue(obj, out GameObject prefab))
@@ -81,5 +98,20 @@ public class ObjectPoolManager : Singleton<ObjectPoolManager>
                 pool.Release(obj);
             }
         }
+
+        activeObjectList.Remove(obj);
+    }
+
+    //활성화된 모든 오브젝트를 비활성화 함
+    private void ReturnAllObjectToPool()
+    {
+        List<GameObject> copy = new List<GameObject>(activeObjectList);
+
+        foreach (var obj in copy)
+        {
+            ReturnObjectToPool(obj);
+        }
+
+        activeObjectList.Clear();
     }
 }

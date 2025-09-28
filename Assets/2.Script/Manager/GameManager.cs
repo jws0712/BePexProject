@@ -1,4 +1,5 @@
 //System
+using System;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -9,6 +10,7 @@ public enum GameStateType
 {
     Play,
     Pause,
+    Restart,
     End,
 }  
 
@@ -49,6 +51,9 @@ public class GameManager : Singleton<GameManager>
     private double startDspTime;
     private double pauseOffset;
 
+    private event Action pauseEvent;
+    private event Action restartEvent;
+
     private GameStateType gameState;
 
     public bool IsAuto => isAuto;
@@ -69,29 +74,24 @@ public class GameManager : Singleton<GameManager>
 
     private void Start()
     {
-        gameState = GameStateType.Play;
+        Init();
+        AddGameEventListener(GameStateType.Restart, Init);
+    }
 
-        secPerBeat = 60 / musicBpm;
-        startDspTime = AudioSettings.dspTime;
-        noteTravelTime = (noteSpawnTransformCenter.position.y - judgeLineCenter.position.y) / (noteSpeed * gameSpeedMultiplier);
-
-        //딜레이 시간만큼 멈췄다가 음악 실행
-        SoundManager.Instance.PlayMusic(music, noteTravelTime);
+    private void OnDestroy()
+    {
+        if (Instance == null) return;
+        RemoveGameEventListener(GameStateType.Restart, Init);
     }
 
     private void Update()
     {
-        if(songPosition > SoundManager.Instance.MusicLength - noteTravelTime)
-        {
-            gameState = GameStateType.End;
-            return;
-        }
         if (gameState == GameStateType.Pause) return;
 
         songPosition = ((AudioSettings.dspTime - startDspTime) * gameSpeedMultiplier) - musicOffset;
 
         //박자 마다 노트 소환
-        if (songPosition > nextBeatPos)
+        if (songPosition > nextBeatPos && songPosition < SoundManager.Instance.MusicLength - noteTravelTime)
         {
             for(int i = 0; i < JudgeManager.Instance.NoteQueues.Length; i++)
             {
@@ -102,9 +102,61 @@ public class GameManager : Singleton<GameManager>
         }
     }
 
+    private void Init()
+    {
+        SoundManager.Instance.StopMusic();
+
+        gameState = GameStateType.Play;
+
+        secPerBeat = 60 / musicBpm;
+        songPosition = 0;
+        nextBeatPos = 0;
+        startDspTime = AudioSettings.dspTime;
+        noteTravelTime = (noteSpawnTransformCenter.position.y - judgeLineCenter.position.y) / (noteSpeed * gameSpeedMultiplier);
+
+        //딜레이 시간만큼 멈췄다가 음악 실행
+        SoundManager.Instance.PlayMusic(music, noteTravelTime);
+    }
+
+    public void AddGameEventListener(GameStateType state, Action listener)
+    {
+        switch(state)
+        {
+            case GameStateType.Pause:
+                {
+                    pauseEvent += listener;
+                    break;
+                }
+            case GameStateType.Restart:
+                {
+                    restartEvent += listener;
+                    break;
+                }
+        }
+    }
+
+    public void RemoveGameEventListener(GameStateType state, Action listener)
+    {
+        switch (state)
+        {
+            case GameStateType.Pause:
+                {
+                    pauseEvent -= listener;
+                    break;
+                }
+            case GameStateType.Restart:
+                {
+                    restartEvent -= listener;
+                    break;
+                }
+        }
+    }
+
     //일시정지
     public void Pause()
     {
+        pauseEvent?.Invoke();
+
         gameState = GameStateType.Pause;
         pauseOffset = AudioSettings.dspTime - startDspTime;
         SoundManager.Instance.PauseMusic();
@@ -121,6 +173,6 @@ public class GameManager : Singleton<GameManager>
     //다시하기
     public void ReStart()
     {
-        //다시하기
+        restartEvent?.Invoke();
     }
 }

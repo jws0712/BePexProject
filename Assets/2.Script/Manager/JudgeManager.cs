@@ -54,16 +54,23 @@ public class JudgeManager : Singleton<JudgeManager>
     private void Start()
     {
         center = GameManager.Instance.JudgeLineCenter;
+        GameManager.Instance.AddGameEventListener(GameStateType.Restart, ResetJudgeEffect);
+    }
+
+    private void OnDestroy()
+    {
+        if (GameManager.Instance == null) return;
+        GameManager.Instance.RemoveGameEventListener(GameStateType.Restart, ResetJudgeEffect);
+    }
+
+    private void ResetJudgeEffect()
+    {
+        currentJudgeEffect = null;
     }
 
     private void Update()
     {
         NoteHitAuto();
-
-        if(GameManager.Instance.GameState == GameStateType.Pause)
-        {
-            currentJudgeEffect = null;
-        }
     }
 
     //자동으로 노트 판정
