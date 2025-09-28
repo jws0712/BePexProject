@@ -5,8 +5,6 @@ public class Note : MonoBehaviour
 {
     private int noteHitLine;
 
-    private bool isQuit;
-
     private double noteSpawnTime;
     private double noteHitTime;
 
@@ -24,21 +22,10 @@ public class Note : MonoBehaviour
         transform.position = new Vector2(transform.position.x, targetY);
     }
 
-    public void Initialize(LineType hitLine, double spawnTime)
+    public void Init(LineType hitLine, double spawnTime)
     {
         noteHitLine = (int)hitLine;
         noteSpawnTime = spawnTime;
         noteHitTime = noteSpawnTime + GameManager.Instance.NoteTravelTime;
-    }
-
-    private void OnApplicationQuit()
-    {
-        isQuit = true;
-    }
-
-    private void OnBecameInvisible()
-    {
-        if (isQuit) return;
-        JudgeManager.Instance.JudgeNoteOutCamera(this);
     }
 }

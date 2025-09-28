@@ -50,7 +50,7 @@ public class AddressableManager : Singleton<AddressableManager>
         {
             if (obj.Result.TryGetComponent(out Note note))
             {
-                note.Initialize((LineType)lineIndex, GameManager.Instance.SongPosition);
+                note.Init((LineType)lineIndex, GameManager.Instance.SongPosition);
                 JudgeManager.Instance.NoteQueues[lineIndex].Enqueue(note);
             }
             loadedObjectList.Add(obj.Result);
@@ -69,7 +69,9 @@ public class AddressableManager : Singleton<AddressableManager>
 
     private void ReleaseAllObject()
     {
-        foreach(var obj in loadedObjectList)
+        List<GameObject> copy = new List<GameObject>(loadedObjectList);
+
+        foreach (var obj in copy)
         {
             Addressables.ReleaseInstance(obj);
         }

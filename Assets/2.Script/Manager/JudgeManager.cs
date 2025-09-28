@@ -2,6 +2,8 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor.Experimental.GraphView;
+
 
 //UnityEngine
 using UnityEngine;
@@ -54,18 +56,25 @@ public class JudgeManager : Singleton<JudgeManager>
     private void Start()
     {
         center = GameManager.Instance.JudgeLineCenter;
-        GameManager.Instance.AddGameEventListener(GameStateType.Restart, ResetJudgeEffect);
+        GameManager.Instance.AddGameEventListener(GameStateType.Restart, ResetJudgeState);
     }
 
     private void OnDestroy()
     {
         if (GameManager.Instance == null) return;
-        GameManager.Instance.RemoveGameEventListener(GameStateType.Restart, ResetJudgeEffect);
+        GameManager.Instance.RemoveGameEventListener(GameStateType.Restart, ResetJudgeState);
     }
 
-    private void ResetJudgeEffect()
+    private void ResetJudgeState()
     {
+        comboCount = 0;
+
         currentJudgeEffect = null;
+
+        foreach(var noteQueue in noteQueues)
+        {
+            noteQueue.Clear();
+        }
     }
 
     private void Update()
@@ -124,23 +133,14 @@ public class JudgeManager : Singleton<JudgeManager>
                 return;
             }
         }
-    }
 
-    //카메라에서 나갔을때 노트 판정
-    public void JudgeNoteOutCamera(Note note)
-    {
-        int index = note.NoteHitLine;
+        comboCount = 0;
 
-        if (noteQueues[index].Count > 0 && noteQueues[index].Peek() == note)
-        {
-            comboCount = 0;
+        noteQueues[lineIndex].Dequeue();
 
-            noteQueues[index].Dequeue();
+        SpawnJudgeEffect(JudgeType.Bad);
 
-            SpawnJudgeEffect(JudgeType.Bad);
-
-            AddressableManager.Instance.ReleaseObject(note.gameObject);
-        }
+        AddressableManager.Instance.ReleaseObject(currentNote.gameObject);
     }
 
     //판정이펙트 설정및 소환
@@ -156,5 +156,16 @@ public class JudgeManager : Singleton<JudgeManager>
 
         currentJudgeEffect = ObjectPoolManager.Instance.SpawnObject(judgeEffect, canvas.transform.position, Quaternion.identity);
         currentJudgeEffect.transform.SetParent(canvas);
+    }
+
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if(collision.CompareTag("Note"))
+        {
+            if(collision.TryGetComponent(out Note note))
+            {
+                JudgeNote(note.NoteHitLine);
+            }
+        }
     }
 }
