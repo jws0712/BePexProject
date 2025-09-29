@@ -29,8 +29,8 @@ public class GameManager : Singleton<GameManager>
     [SerializeField] private float noteSpeed;
     [SerializeField] private float musicOffset;
     [SerializeField] private float gameSpeedMultiplier;
-
     [SerializeField] private int gameFrameRate;
+    [SerializeField] private GameObject notePrefab;
 
     [Header("Clip")]
     [SerializeField] private AudioClip music;
@@ -90,12 +90,18 @@ public class GameManager : Singleton<GameManager>
 
         songPosition = ((AudioSettings.dspTime - startDspTime) * gameSpeedMultiplier) - musicOffset;
 
-        //박자 마다 노트 소환
         if (songPosition > nextBeatPos && songPosition < SoundManager.Instance.MusicLength - noteTravelTime)
         {
             for(int i = 0; i < JudgeManager.Instance.NoteQueues.Length; i++)
             {
-                AddressableManager.Instance.LoadNoteObject(i, noteSpawnTransforms[i]);
+                GameObject obj = ObjectPoolManager.Instance.SpawnObject(notePrefab, noteSpawnTransforms[i].position, Quaternion.identity);
+
+                if(obj.TryGetComponent(out Note note))
+                {
+                    note.Init((LineType)i, SongPosition);
+                    JudgeManager.Instance.NoteQueues[i].Enqueue(note);
+                }
+
             }
 
             nextBeatPos += secPerBeat;
@@ -109,8 +115,10 @@ public class GameManager : Singleton<GameManager>
         gameState = GameStateType.Play;
 
         secPerBeat = 60 / musicBpm;
+
         songPosition = 0;
         nextBeatPos = 0;
+
         startDspTime = AudioSettings.dspTime;
         noteTravelTime = (noteSpawnTransformCenter.position.y - judgeLineCenter.position.y) / (noteSpeed * gameSpeedMultiplier);
 

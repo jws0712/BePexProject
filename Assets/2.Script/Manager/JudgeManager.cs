@@ -2,11 +2,11 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using UnityEditor.Experimental.GraphView;
 
 
 //UnityEngine
 using UnityEngine;
+using UnityEngine.AddressableAssets;
 
 public enum JudgeType
 {
@@ -82,7 +82,6 @@ public class JudgeManager : Singleton<JudgeManager>
         NoteHitAuto();
     }
 
-    //자동으로 노트 판정
     private void NoteHitAuto()
     {
         if (!GameManager.Instance.IsAuto) return;
@@ -100,7 +99,6 @@ public class JudgeManager : Singleton<JudgeManager>
         }
     }
 
-    //노트 판정
     public void JudgeNote(int lineIndex)
     {
         if (noteQueues[lineIndex].Count == 0) return;
@@ -111,22 +109,17 @@ public class JudgeManager : Singleton<JudgeManager>
 
         for (int j = 0; j < judgeDatas.Length; j++)
         {
-            //노트의 Y 값이 판정 범위내에 있는지 확인
             if ((center.position.y + judgeDatas[j].distance) >= notePosY
              && (center.position.y - judgeDatas[j].distance) <= notePosY)
             {
                 comboCount++;
 
-                //노트 오브젝트 메모리 해제
-                AddressableManager.Instance.ReleaseObject(currentNote.gameObject);
+                ObjectPoolManager.Instance.ReturnObjectToPool(currentNote.gameObject);
 
-
-                //이펙트 소환
                 ObjectPoolManager.Instance.SpawnObject(hitEffect, new Vector2(GameManager.Instance.NoteSpawnTransforms[lineIndex].position.x, center.position.y), Quaternion.identity);
 
                 SpawnJudgeEffect(judgeDatas[j].type);
 
-                //효과음 재생
                 SoundManager.Instance.PlaySFX(GameManager.Instance.NoteHitSfx);
 
                 noteQueues[lineIndex].Dequeue();
@@ -140,10 +133,9 @@ public class JudgeManager : Singleton<JudgeManager>
 
         SpawnJudgeEffect(JudgeType.Bad);
 
-        AddressableManager.Instance.ReleaseObject(currentNote.gameObject);
+        ObjectPoolManager.Instance.ReturnObjectToPool(currentNote.gameObject);
     }
 
-    //판정이펙트 설정및 소환
     private void SpawnJudgeEffect(JudgeType judge)
     {
         judgeResult = judge;

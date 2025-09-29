@@ -9678,7 +9678,7 @@ GameObject:
   - component: {fileID: 19925856}
   - component: {fileID: 4836124683302405389}
   m_Layer: 0
-  m_Name: Note VFX
+  m_Name: HitEffectPrefab
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

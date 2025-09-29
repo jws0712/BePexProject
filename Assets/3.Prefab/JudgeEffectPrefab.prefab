@@ -88,7 +88,7 @@ GameObject:
   - component: {fileID: 6178659415145874199}
   - component: {fileID: 6178659415145874198}
   m_Layer: 5
-  m_Name: JudgeEffect
+  m_Name: JudgeEffectPrefab
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -128,7 +128,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5ff5289f07315cd4fa054daf79a62bf9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  destroyTime: 0.6
   judge: {fileID: 6178659417070089213}
   combo: {fileID: 6178659416357434534}
 --- !u!95 &6178659415145874198

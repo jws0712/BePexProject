@@ -18,15 +18,15 @@ MonoBehaviour:
   m_GUID: 8bbbfb8367eb7244da0c08b345254d40
   m_SerializeEntries:
   - m_GUID: 426b4723136cb034bb1b921e3f14300f
-    m_Address: Assets/3.Prefab/Note.prefab
+    m_Address: Assets/3.Prefab/NotePrefab.prefab
     m_ReadOnly: 0
     m_SerializedLabels: []
   - m_GUID: 62bc425171c9c964ba37f4fde2b18e46
-    m_Address: Assets/3.Prefab/Note VFX.prefab
+    m_Address: Assets/3.Prefab/HitEffectPrefab.prefab
     m_ReadOnly: 0
     m_SerializedLabels: []
   - m_GUID: 11143c8a468c7c14793a078c53339a8a
-    m_Address: Assets/3.Prefab/JudgeEffect.prefab
+    m_Address: Assets/3.Prefab/JudgeEffectPrefab.prefab
     m_ReadOnly: 0
     m_SerializedLabels: []
   m_ReadOnly: 0

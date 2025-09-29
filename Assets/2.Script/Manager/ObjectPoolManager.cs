@@ -24,11 +24,11 @@ public class ObjectPoolManager : Singleton<ObjectPoolManager>
         GameManager.Instance.RemoveGameEventListener(GameStateType.Restart, ReturnAllObjectToPool);
     }
     
-    private void CreatePool(GameObject prefab, Vector3 pos, Quaternion rot)
+    private void CreatePool(GameObject prefab)
     {
         ObjectPool<GameObject> pool = new ObjectPool<GameObject>
         (
-            createFunc: () => CreateObject(prefab, pos, rot),
+            createFunc: () => CreateObject(prefab),
             actionOnGet: OnGetObject,
             actionOnRelease: OnReleaseObject,
             actionOnDestroy: OnDestroyObject
@@ -37,10 +37,10 @@ public class ObjectPoolManager : Singleton<ObjectPoolManager>
         objectPoolDict.Add(prefab, pool);
     }
 
-    private GameObject CreateObject(GameObject prefab, Vector3 pos, Quaternion rot)
+    private GameObject CreateObject(GameObject prefab)
     {
-        prefab.SetActive(false);
-        GameObject obj = Instantiate(prefab, pos, rot);
+        GameObject obj = Instantiate(prefab);
+        obj.SetActive(false);
         return obj;
     }
 
@@ -62,21 +62,20 @@ public class ObjectPoolManager : Singleton<ObjectPoolManager>
         }
     }
 
-    //오브젝트를 풀에서 꺼내 배치
-    public GameObject SpawnObject(GameObject spawnObj,  Vector3 spawnPos, Quaternion spawnRot)
+    public GameObject SpawnObject(GameObject prefab,  Vector3 spawnPos, Quaternion spawnRot)
     {
-        if(!objectPoolDict.ContainsKey(spawnObj))
+        if(!objectPoolDict.ContainsKey(prefab))
         {
-            CreatePool(spawnObj, spawnPos, spawnRot);
+            CreatePool(prefab);
         }
 
-        GameObject obj = objectPoolDict[spawnObj].Get();
+        GameObject obj = objectPoolDict[prefab].Get();
 
         if(obj != null)
         {
             if(!clonePrefabDict.ContainsKey(obj))
             {
-                clonePrefabDict.Add(obj, spawnObj);
+                clonePrefabDict.Add(obj, prefab);
             }
 
             obj.transform.SetPositionAndRotation(spawnPos, spawnRot);
@@ -88,12 +87,11 @@ public class ObjectPoolManager : Singleton<ObjectPoolManager>
         return null;
     }
 
-    //오브젝트를 풀로 되돌림
     public void ReturnObjectToPool(GameObject obj)
     {
-        if(clonePrefabDict.TryGetValue(obj, out GameObject prefab))
+        if(clonePrefabDict.TryGetValue(obj, out GameObject key))
         {
-            if (objectPoolDict.TryGetValue(prefab, out ObjectPool<GameObject> pool))
+            if (objectPoolDict.TryGetValue(key, out ObjectPool<GameObject> pool))
             {
                 pool.Release(obj);
             }
@@ -102,7 +100,6 @@ public class ObjectPoolManager : Singleton<ObjectPoolManager>
         activeObjectList.Remove(obj);
     }
 
-    //활성화된 모든 오브젝트를 비활성화 함
     private void ReturnAllObjectToPool()
     {
         List<GameObject> copy = new List<GameObject>(activeObjectList);
