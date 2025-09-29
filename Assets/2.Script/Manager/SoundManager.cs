@@ -1,33 +1,37 @@
 //UnityEngine
 using UnityEngine;
 
+//FMOD
+using FMOD.Studio;
+using FMODUnity;
+
 public class SoundManager : Singleton<SoundManager>
 {
-    [SerializeField] private AudioSource bgmSource;
-    [SerializeField] private AudioSource sfxSource;
-
-    private AudioClip currentSFXClip;
-
     private bool isPlayMusicWithDelay;
 
     private double delayTime;
+
+    private EventInstance currentEventInstance;
 
     public float MusicLength
     {
         get
         {
-            if(bgmSource.clip != null)
+            if(currentEventInstance.isValid())
             {
-                return bgmSource.clip.length;
+                currentEventInstance.getDescription(out EventDescription description);
+                description.getLength(out int length);
+                return length / 1000f; //ms 변환
             }
 
             return 0;
         }
     }
 
-    private void Start()
+    private void OnDestroy()
     {
-        bgmSource.pitch = GameManager.Instance.GameSpeedMultiplier;
+        StopMusic();
+        currentEventInstance.release();
     }
 
     private void Update()
@@ -37,22 +41,24 @@ public class SoundManager : Singleton<SoundManager>
         //딜레이 시간만큼 멈췄다가 음악재생
         if (isPlayMusicWithDelay && delayTime <= GameManager.Instance.SongPosition)
         {
-            bgmSource.Play();
+            currentEventInstance.start();
             isPlayMusicWithDelay = false;
         }
     }
 
     //음악 재생
-    public void PlayMusic(AudioClip clip)
+    public void PlayMusic(EventReference eventRef)
     {
-        bgmSource.clip = clip;
-        bgmSource.Play();
+        currentEventInstance = RuntimeManager.CreateInstance(eventRef);
+        currentEventInstance.setPitch(GameManager.Instance.GameSpeedMultiplier);
+        currentEventInstance.start();
     }
 
     //딜레이 후 음악 재생
-    public void PlayMusic(AudioClip clip, double delayTime)
+    public void PlayMusic(EventReference eventRef, double delayTime)
     {
-        bgmSource.clip = clip;
+        currentEventInstance = RuntimeManager.CreateInstance(eventRef);
+        currentEventInstance.setPitch(GameManager.Instance.GameSpeedMultiplier);
         this.delayTime = delayTime;
         isPlayMusicWithDelay = true;
     }
@@ -60,25 +66,28 @@ public class SoundManager : Singleton<SoundManager>
     //음악 정지
     public void StopMusic()
     {
-        bgmSource.Stop();
+        if (!currentEventInstance.isValid()) return;
+        currentEventInstance.stop(FMOD.Studio.STOP_MODE.IMMEDIATE);
     }
 
     //음악 일시정지
     public void PauseMusic()
     {
-        bgmSource.Pause();
+        if (!currentEventInstance.isValid()) return;
+        currentEventInstance.setPaused(true);
     }
 
     //음악 일시정지 풀기
     public void UnPauseMusic()
     {
-        bgmSource.UnPause();
+        if (!currentEventInstance.isValid()) return;
+        currentEventInstance.setPaused(false);
     }
 
     //효과음 재생
-    public void PlaySFX(AudioClip clip)
+    public void PlaySFX(EventReference eventRef)
     {
-        sfxSource.PlayOneShot(clip);
+        RuntimeManager.PlayOneShot(eventRef);
     }
 
 }

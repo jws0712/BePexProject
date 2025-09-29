@@ -69,6 +69,8 @@ public class ObjectPoolManager : Singleton<ObjectPoolManager>
 
     private void OnDestroyObject(GameObject obj)
     {
+        if (obj == null) return;
+
         if(clonePrefabDict.ContainsKey(obj))
         {
             Addressables.ReleaseInstance(obj);

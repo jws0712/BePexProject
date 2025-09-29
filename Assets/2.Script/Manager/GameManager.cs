@@ -1,12 +1,13 @@
 //System
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEditor.Build.Reporting;
-
 
 //UnityEngine
 using UnityEngine;
+
+//FMOD
+using FMOD;
+using FMODUnity;
+using FMOD.Studio;
 
 //Project
 using static AddressableKey;
@@ -38,8 +39,7 @@ public class GameManager : Singleton<GameManager>
     [SerializeField] private int gameFrameRate;
 
     [Header("Clip")]
-    [SerializeField] private AudioClip music;
-    [SerializeField] private AudioClip noteHitSfx;
+    [SerializeField] private EventReference music;
 
     [Header("Transform")]
     [SerializeField] private Transform judgeLineCenter;
@@ -49,15 +49,20 @@ public class GameManager : Singleton<GameManager>
     [Header("AutoMode")]
     [SerializeField] private bool isAuto;
 
-    private double secPerBeat;
-    private double nextBeatPos;
-    private double noteTravelTime;
+    private float secPerBeat;
+    private float nextBeatPos;
+    private float noteTravelTime;
+
     private double songPosition;
-    private double startDspTime;
-    private double pauseOffset;
+
+    private ulong startDspTime;
+    private ulong pauseOffset;
 
     private event Action pauseEvent;
     private event Action restartEvent;
+
+    private FMOD.System coreSystem;
+    private ChannelGroup masterChannelGroup;
 
     private GameStateType gameState;
 
@@ -65,7 +70,6 @@ public class GameManager : Singleton<GameManager>
     public float GameSpeedMultiplier => gameSpeedMultiplier;
     public double NoteTravelTime => noteTravelTime;
     public double SongPosition => songPosition;
-    public AudioClip NoteHitSfx => noteHitSfx;
     public Transform JudgeLineCenter => judgeLineCenter;
     public Transform NoteSpawnTransformCenter => noteSpawnTransformCenter;
     public Transform[] NoteSpawnTransforms => noteSpawnTransforms;
@@ -74,6 +78,8 @@ public class GameManager : Singleton<GameManager>
     public override void Awake()
     {
         base.Awake();
+
+
         Application.targetFrameRate = gameFrameRate;
     }
 
@@ -83,7 +89,7 @@ public class GameManager : Singleton<GameManager>
         AddGameEventListener(GameStateType.Restart, Init);
     }
 
-    private void OnDestroy()
+    private void OnDisable()
     {
         if (Instance == null) return;
         RemoveGameEventListener(GameStateType.Restart, Init);
@@ -93,7 +99,10 @@ public class GameManager : Singleton<GameManager>
     {
         if (gameState == GameStateType.Pause) return;
 
-        songPosition = ((AudioSettings.dspTime - startDspTime) * gameSpeedMultiplier) - musicOffset;
+        masterChannelGroup.getDSPClock(out ulong currentDspTime, out _);
+        coreSystem.getSoftwareFormat(out int sampleRate, out _, out _);
+        
+        songPosition = (((double)(currentDspTime - startDspTime) / sampleRate) * gameSpeedMultiplier) - musicOffset;
 
         if (songPosition > nextBeatPos && songPosition < SoundManager.Instance.MusicLength - noteTravelTime)
         {
@@ -124,7 +133,10 @@ public class GameManager : Singleton<GameManager>
         songPosition = 0;
         nextBeatPos = 0;
 
-        startDspTime = AudioSettings.dspTime;
+        coreSystem = RuntimeManager.CoreSystem;
+        coreSystem.getMasterChannelGroup(out masterChannelGroup);
+
+        masterChannelGroup.getDSPClock(out startDspTime, out _);
         noteTravelTime = (noteSpawnTransformCenter.position.y - judgeLineCenter.position.y) / (noteSpeed * gameSpeedMultiplier);
 
         //µÙ∑π¿Ã Ω√∞£∏∏≈≠ ∏ÿ√Ë¥Ÿ∞° ¿Ωæ« Ω««‡
@@ -171,7 +183,10 @@ public class GameManager : Singleton<GameManager>
         pauseEvent?.Invoke();
 
         gameState = GameStateType.Pause;
-        pauseOffset = AudioSettings.dspTime - startDspTime;
+        masterChannelGroup.getDSPClock(out ulong currentDspTime, out _);
+        pauseOffset = currentDspTime - startDspTime;
+
+
         SoundManager.Instance.PauseMusic();
     }
 
@@ -179,7 +194,8 @@ public class GameManager : Singleton<GameManager>
     public void UnPause()
     {
         gameState = GameStateType.Play;
-        startDspTime = AudioSettings.dspTime - pauseOffset;
+        masterChannelGroup.getDSPClock(out ulong currentDspTime, out _);
+        startDspTime = currentDspTime - pauseOffset;
         SoundManager.Instance.UnPauseMusic();
     }
 

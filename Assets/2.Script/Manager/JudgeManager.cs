@@ -1,4 +1,5 @@
 //System
+using FMODUnity;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -28,6 +29,7 @@ public struct JudgeData
 
 public class JudgeManager : Singleton<JudgeManager>
 {
+    [SerializeField] private EventReference noteHitSFX;
     [SerializeField] private JudgeData[] judgeDatas;
     [SerializeField] private Transform canvas;
 
@@ -121,7 +123,7 @@ public class JudgeManager : Singleton<JudgeManager>
 
                 SpawnJudgeEffect(judgeDatas[j].type);
 
-                SoundManager.Instance.PlaySFX(GameManager.Instance.NoteHitSfx);
+                SoundManager.Instance.PlaySFX(noteHitSFX);
 
                 noteQueues[lineIndex].Dequeue();
                 return;
