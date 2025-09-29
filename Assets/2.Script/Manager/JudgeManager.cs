@@ -8,6 +8,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 
+//Project
+using static AddressableKey;
+
 public enum JudgeType
 {
     Perfect,
@@ -26,8 +29,6 @@ public struct JudgeData
 public class JudgeManager : Singleton<JudgeManager>
 {
     [SerializeField] private JudgeData[] judgeDatas;
-    [SerializeField] private GameObject hitEffect;
-    [SerializeField] private GameObject judgeEffect;
     [SerializeField] private Transform canvas;
 
     private int comboCount;
@@ -116,7 +117,7 @@ public class JudgeManager : Singleton<JudgeManager>
 
                 ObjectPoolManager.Instance.ReturnObjectToPool(currentNote.gameObject);
 
-                ObjectPoolManager.Instance.SpawnObject(hitEffect, new Vector2(GameManager.Instance.NoteSpawnTransforms[lineIndex].position.x, center.position.y), Quaternion.identity);
+                ObjectPoolManager.Instance.SpawnObject(HitEffectPrefab, new Vector2(GameManager.Instance.NoteSpawnTransforms[lineIndex].position.x, center.position.y), Quaternion.identity);
 
                 SpawnJudgeEffect(judgeDatas[j].type);
 
@@ -146,7 +147,7 @@ public class JudgeManager : Singleton<JudgeManager>
             currentJudgeEffect = null;
         }
 
-        currentJudgeEffect = ObjectPoolManager.Instance.SpawnObject(judgeEffect, canvas.transform.position, Quaternion.identity);
+        currentJudgeEffect = ObjectPoolManager.Instance.SpawnObject(JudgeEffectPrefab, canvas.transform.position, Quaternion.identity);
         currentJudgeEffect.transform.SetParent(canvas);
     }
 

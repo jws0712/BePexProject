@@ -2,9 +2,14 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor.Build.Reporting;
+
 
 //UnityEngine
 using UnityEngine;
+
+//Project
+using static AddressableKey;
 
 public enum GameStateType
 {
@@ -24,13 +29,13 @@ public enum LineType
 
 public class GameManager : Singleton<GameManager>
 {
+
     [Header("GameSetting")]
     [SerializeField] private float musicBpm;
     [SerializeField] private float noteSpeed;
     [SerializeField] private float musicOffset;
     [SerializeField] private float gameSpeedMultiplier;
     [SerializeField] private int gameFrameRate;
-    [SerializeField] private GameObject notePrefab;
 
     [Header("Clip")]
     [SerializeField] private AudioClip music;
@@ -94,7 +99,7 @@ public class GameManager : Singleton<GameManager>
         {
             for(int i = 0; i < JudgeManager.Instance.NoteQueues.Length; i++)
             {
-                GameObject obj = ObjectPoolManager.Instance.SpawnObject(notePrefab, noteSpawnTransforms[i].position, Quaternion.identity);
+                GameObject obj = ObjectPoolManager.Instance.SpawnObject(NotePrefab, noteSpawnTransforms[i].position, Quaternion.identity);
 
                 if(obj.TryGetComponent(out Note note))
                 {

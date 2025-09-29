@@ -4,12 +4,14 @@ using System.Collections.Generic;
 
 //UnityEngeine
 using UnityEngine;
+using UnityEngine.AddressableAssets;
 using UnityEngine.Pool;
+using UnityEngine.ResourceManagement.AsyncOperations;
 
 public class ObjectPoolManager : Singleton<ObjectPoolManager>
 {
-    private Dictionary<GameObject, ObjectPool<GameObject>> objectPoolDict = new();
-    private Dictionary<GameObject, GameObject> clonePrefabDict = new();
+    private Dictionary<string, ObjectPool<GameObject>> objectPoolDict = new();
+    private Dictionary<GameObject, string> clonePrefabDict = new();
 
     private List<GameObject> activeObjectList = new();
 
@@ -20,26 +22,37 @@ public class ObjectPoolManager : Singleton<ObjectPoolManager>
 
     private void OnDestroy()
     {
+        foreach(var pool in objectPoolDict.Values)
+        {
+            pool.Clear();
+        }
+
+        objectPoolDict.Clear();
+        clonePrefabDict.Clear();
+        activeObjectList.Clear();
+
         if (GameManager.Instance == null) return;
         GameManager.Instance.RemoveGameEventListener(GameStateType.Restart, ReturnAllObjectToPool);
     }
     
-    private void CreatePool(GameObject prefab)
+    private void CreatePool(string addressKey)
     {
         ObjectPool<GameObject> pool = new ObjectPool<GameObject>
         (
-            createFunc: () => CreateObject(prefab),
+            createFunc: () => CreateObject(addressKey),
             actionOnGet: OnGetObject,
             actionOnRelease: OnReleaseObject,
             actionOnDestroy: OnDestroyObject
         );
 
-        objectPoolDict.Add(prefab, pool);
+        objectPoolDict.Add(addressKey, pool);
     }
 
-    private GameObject CreateObject(GameObject prefab)
+    private GameObject CreateObject(string addressKey)
     {
-        GameObject obj = Instantiate(prefab);
+        AsyncOperationHandle<GameObject> handle = Addressables.InstantiateAsync(addressKey);
+        handle.WaitForCompletion();
+        GameObject obj = handle.Result;
         obj.SetActive(false);
         return obj;
     }
@@ -58,28 +71,28 @@ public class ObjectPoolManager : Singleton<ObjectPoolManager>
     {
         if(clonePrefabDict.ContainsKey(obj))
         {
+            Addressables.ReleaseInstance(obj);
             clonePrefabDict.Remove(obj);
         }
     }
 
-    public GameObject SpawnObject(GameObject prefab,  Vector3 spawnPos, Quaternion spawnRot)
+    public GameObject SpawnObject(string addressKey,  Vector3 spawnPos, Quaternion spawnRot)
     {
-        if(!objectPoolDict.ContainsKey(prefab))
+        if(!objectPoolDict.ContainsKey(addressKey))
         {
-            CreatePool(prefab);
+            CreatePool(addressKey);
         }
 
-        GameObject obj = objectPoolDict[prefab].Get();
+        GameObject obj = objectPoolDict[addressKey].Get();
 
         if(obj != null)
         {
             if(!clonePrefabDict.ContainsKey(obj))
             {
-                clonePrefabDict.Add(obj, prefab);
+                clonePrefabDict.Add(obj, addressKey);
             }
 
             obj.transform.SetPositionAndRotation(spawnPos, spawnRot);
-
             activeObjectList.Add(obj);
             return obj;
         }
@@ -89,7 +102,7 @@ public class ObjectPoolManager : Singleton<ObjectPoolManager>
 
     public void ReturnObjectToPool(GameObject obj)
     {
-        if(clonePrefabDict.TryGetValue(obj, out GameObject key))
+        if(clonePrefabDict.TryGetValue(obj, out string key))
         {
             if (objectPoolDict.TryGetValue(key, out ObjectPool<GameObject> pool))
             {
