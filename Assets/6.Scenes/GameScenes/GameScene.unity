@@ -2654,9 +2654,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   musicBpm: 120
   noteSpeed: 5
-  musicOffset: 0.3
-  gameSpeedMultiplier: 2
-  gameFrameRate: 120
+  musicOffset: 0.2
+  gameSpeedMultiplier: 1
+  gameFrameRate: 30
   music:
     Guid:
       Data1: 2022111386

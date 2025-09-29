@@ -9,7 +9,7 @@ public class SoundManager : Singleton<SoundManager>
 {
     private bool isPlayMusicWithDelay;
 
-    private double delayTime;
+    private float delayTime;
 
     private EventInstance currentEventInstance;
 
@@ -55,7 +55,7 @@ public class SoundManager : Singleton<SoundManager>
     }
 
     //µô·¹ÀÌ ÈÄ À½¾Ç Àç»ý
-    public void PlayMusic(EventReference eventRef, double delayTime)
+    public void PlayMusic(EventReference eventRef, float delayTime)
     {
         currentEventInstance = RuntimeManager.CreateInstance(eventRef);
         currentEventInstance.setPitch(GameManager.Instance.GameSpeedMultiplier);

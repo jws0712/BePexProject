@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<objects serializationModel="Studio.02.03.00">
+	<object class="AudioFile" id="{ba0680d8-3168-4a68-baa0-c65167d29959}">
+		<property name="assetPath">
+			<value>Minigame_Jump.wav</value>
+		</property>
+		<property name="isStreaming">
+			<value>true</value>
+		</property>
+		<property name="frequencyInKHz">
+			<value>44.0999985</value>
+		</property>
+		<property name="channelCount">
+			<value>2</value>
+		</property>
+		<property name="length">
+			<value>102</value>
+		</property>
+		<relationship name="masterAssetFolder">
+			<destination>{50f02436-4266-4263-8e83-efc7cb629f0e}</destination>
+		</relationship>
+	</object>
+</objects>

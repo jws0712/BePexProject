@@ -1,5 +1,4 @@
 //System
-using System.Collections;
 using System.Collections.Generic;
 
 //UnityEngeine
@@ -52,6 +51,7 @@ public class ObjectPoolManager : Singleton<ObjectPoolManager>
     {
         AsyncOperationHandle<GameObject> handle = Addressables.InstantiateAsync(addressKey);
         handle.WaitForCompletion();
+
         GameObject obj = handle.Result;
         obj.SetActive(false);
         return obj;

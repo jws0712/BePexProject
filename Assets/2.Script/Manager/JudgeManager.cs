@@ -1,13 +1,11 @@
 //System
 using FMODUnity;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 
 
 //UnityEngine
 using UnityEngine;
-using UnityEngine.AddressableAssets;
 
 //Project
 using static AddressableKey;

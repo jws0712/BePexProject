@@ -7,7 +7,6 @@ using UnityEngine;
 //FMOD
 using FMOD;
 using FMODUnity;
-using FMOD.Studio;
 
 //Project
 using static AddressableKey;
@@ -78,8 +77,6 @@ public class GameManager : Singleton<GameManager>
     public override void Awake()
     {
         base.Awake();
-
-
         Application.targetFrameRate = gameFrameRate;
     }
 
@@ -104,19 +101,9 @@ public class GameManager : Singleton<GameManager>
         
         songPosition = (((double)(currentDspTime - startDspTime) / sampleRate) * gameSpeedMultiplier) - musicOffset;
 
-        if (songPosition > nextBeatPos && songPosition < SoundManager.Instance.MusicLength - noteTravelTime)
+        if (songPosition > nextBeatPos && songPosition < SoundManager.Instance.MusicLength)
         {
-            for(int i = 0; i < JudgeManager.Instance.NoteQueues.Length; i++)
-            {
-                GameObject obj = ObjectPoolManager.Instance.SpawnObject(NotePrefab, noteSpawnTransforms[i].position, Quaternion.identity);
-
-                if(obj.TryGetComponent(out Note note))
-                {
-                    note.Init((LineType)i, SongPosition);
-                    JudgeManager.Instance.NoteQueues[i].Enqueue(note);
-                }
-
-            }
+            GenerateNnote();
 
             nextBeatPos += secPerBeat;
         }
@@ -139,8 +126,28 @@ public class GameManager : Singleton<GameManager>
         masterChannelGroup.getDSPClock(out startDspTime, out _);
         noteTravelTime = (noteSpawnTransformCenter.position.y - judgeLineCenter.position.y) / (noteSpeed * gameSpeedMultiplier);
 
+        float delayTime = noteTravelTime - musicOffset;
+
+
         //µÙ∑π¿Ã Ω√∞£∏∏≈≠ ∏ÿ√Ë¥Ÿ∞° ¿Ωæ« Ω««‡
-        SoundManager.Instance.PlayMusic(music, noteTravelTime);
+        SoundManager.Instance.PlayMusic(music, delayTime);
+    }
+
+    private void GenerateNnote()
+    {
+        int spawnCount = UnityEngine.Random.Range(1, JudgeManager.Instance.NoteQueues.Length + 1);
+
+
+        for(int i = 0; i < spawnCount; i++)
+        {
+            GameObject obj = ObjectPoolManager.Instance.SpawnObject(NotePrefab, noteSpawnTransforms[i].position, Quaternion.identity);
+
+            if(obj.TryGetComponent(out Note note))
+            {
+                note.Init((LineType)i, SongPosition);
+                JudgeManager.Instance.NoteQueues[i].Enqueue(note);
+            }
+        }
     }
 
     public void AddGameEventListener(GameStateType state, Action listener)
