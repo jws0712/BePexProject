@@ -99,7 +99,7 @@ public class GameManager : Singleton<GameManager>
         masterChannelGroup.getDSPClock(out ulong currentDspTime, out _);
         coreSystem.getSoftwareFormat(out int sampleRate, out _, out _);
         
-        songPosition = (((double)(currentDspTime - startDspTime) / sampleRate) * gameSpeedMultiplier) - musicOffset;
+        songPosition = (((double)(currentDspTime - startDspTime) / sampleRate) * gameSpeedMultiplier);
 
         if (songPosition > nextBeatPos && songPosition < SoundManager.Instance.MusicLength)
         {

@@ -47,14 +47,13 @@ public class ObjectPoolManager : Singleton<ObjectPoolManager>
         objectPoolDict.Add(addressKey, pool);
     }
 
-    private GameObject CreateObject(string addressKey)
-    {
-        AsyncOperationHandle<GameObject> handle = Addressables.InstantiateAsync(addressKey);
-        handle.WaitForCompletion();
-
-        GameObject obj = handle.Result;
-        obj.SetActive(false);
-        return obj;
+    private GameObject CreateObject(string addressKey) 
+    { 
+        AsyncOperationHandle<GameObject> handle = Addressables.InstantiateAsync(addressKey); 
+        handle.WaitForCompletion(); 
+        GameObject obj = handle.Result; 
+        obj.SetActive(false); 
+        return obj; 
     }
 
     private void OnGetObject(GameObject obj)

@@ -27,7 +27,5 @@ public class Note : MonoBehaviour
         noteHitLine = (int)hitLine;
         noteSpawnTime = spawnTime;
         noteHitTime = noteSpawnTime + GameManager.Instance.NoteTravelTime;
-
-        Debug.Log(noteSpawnTime);
     }
 }
